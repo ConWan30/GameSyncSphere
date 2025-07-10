@@ -1,0 +1,223 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  username          String   @unique
+  password_hash     String
+  full_name         String?
+  profile_picture   String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  last_login        DateTime?
+  is_active         Boolean  @default(true)
+  email_verified    Boolean  @default(false)
+  
+  // Gaming Profile
+  gaming_platforms  Json?    // Array of connected platforms
+  favorite_games    Json?    // Array of favorite games
+  play_style        String?  // casual, competitive, etc.
+  hardware_specs    Json?    // PC specs, console info
+  timezone          String?
+  
+  // Platform Stats
+  total_surveys     Int      @default(0)
+  completed_surveys Int      @default(0)
+  total_earnings    Float    @default(0.0)
+  current_balance   Float    @default(0.0)
+  
+  // Relations
+  surveys           Survey[]
+  survey_responses  SurveyResponse[]
+  parties           Party[]  @relation("PartyMembers")
+  created_parties   Party[]  @relation("PartyCreator")
+  earnings          Earning[]
+  game_sessions     GameSession[]
+  
+  @@map("users")
+}
+
+model Company {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  password_hash   String
+  company_type    String   // game_developer, hardware_manufacturer, research_firm
+  website         String?
+  description     String?
+  verified        Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  
+  // Billing
+  total_spent     Float    @default(0.0)
+  current_budget  Float    @default(0.0)
+  
+  // Relations
+  survey_requests SurveyRequest[]
+  
+  @@map("companies")
+}
+
+model Survey {
+  id                      String   @id @default(cuid())
+  player_id               String
+  game_context            Json     // Game, session time, performance, etc.
+  player_state            Json?    // Platforms, favorite games, etc.
+  questions               Json     // Array of questions with revenue values
+  target_insights         Json?    // Array of insight types
+  survey_personality      String   @default("casual")
+  
+  // AI Generation
+  ai_generated            Boolean  @default(true)
+  ai_provider             String   @default("Claude")
+  ai_prompt_used          String?
+  
+  // Status & Timing
+  status                  String   @default("active") // active, completed, expired
+  created_at              DateTime @default(now())
+  expires_at              DateTime
+  completed_at            DateTime?
+  
+  // Revenue
+  estimated_earnings      Float
+  estimated_completion_time Int    // minutes
+  actual_earnings         Float?
+  
+  // B2B Integration
+  survey_request_id       String?
+  requested_by_company_id String?
+  
+  // Relations
+  player                  User     @relation(fields: [player_id], references: [id])
+  responses               SurveyResponse[]
+  survey_request          SurveyRequest? @relation(fields: [survey_request_id], references: [id])
+  
+  @@map("surveys")
+}
+
+model SurveyResponse {
+  id              String   @id @default(cuid())
+  survey_id       String
+  player_id       String
+  responses       Json     // Array of question responses with earnings
+  total_earnings  Float
+  submitted_at    DateTime @default(now())
+  game_context    Json?
+  ai_provider     String?
+  
+  // Quality Metrics
+  completion_time Int?     // seconds taken to complete
+  quality_score   Float?   // AI-assessed response quality
+  
+  // Relations
+  survey          Survey   @relation(fields: [survey_id], references: [id])
+  player          User     @relation(fields: [player_id], references: [id])
+  
+  @@unique([survey_id, player_id])
+  @@map("survey_responses")
+}
+
+model SurveyRequest {
+  id                String   @id @default(cuid())
+  company_id        String
+  title             String
+  description       String
+  target_audience   Json     // Criteria for player selection
+  target_insights   Json     // Array of desired insights
+  budget            Float
+  max_responses     Int      @default(1000)
+  
+  // Pricing
+  reward_per_response Float
+  platform_fee        Float
+  ai_generation_cost  Float
+  
+  // Status
+  status            String   @default("active") // active, paused, completed, cancelled
+  created_at        DateTime @default(now())
+  expires_at        DateTime
+  completed_at      DateTime?
+  
+  // Results
+  responses_received Int      @default(0)
+  total_spent        Float    @default(0.0)
+  
+  // Relations
+  company           Company  @relation(fields: [company_id], references: [id])
+  generated_surveys Survey[]
+  
+  @@map("survey_requests")
+}
+
+model Party {
+  id            String   @id @default(cuid())
+  creator_id    String
+  game_context  Json
+  party_name    String
+  max_players   Int      @default(4)
+  is_private    Boolean  @default(false)
+  status        String   @default("waiting_for_players")
+  created_at    DateTime @default(now())
+  
+  // WebRTC
+  signaling_room String?
+  
+  // Relations
+  creator       User     @relation("PartyCreator", fields: [creator_id], references: [id])
+  members       User[]   @relation("PartyMembers")
+  
+  @@map("parties")
+}
+
+model GameSession {
+  id                String   @id @default(cuid())
+  player_id         String
+  game_title        String
+  platform          String   // PC, Console, Mobile
+  session_start     DateTime
+  session_end       DateTime?
+  duration_minutes  Int?
+  
+  // Performance Metrics
+  performance_data  Json?    // FPS, latency, hardware temps, etc.
+  
+  // Wellness Indicators
+  break_count       Int      @default(0)
+  wellness_score    Float?
+  
+  // Relations
+  player            User     @relation(fields: [player_id], references: [id])
+  
+  @@map("game_sessions")
+}
+
+model Earning {
+  id              String   @id @default(cuid())
+  player_id       String
+  amount          Float
+  source          String   // survey_response, referral, bonus
+  source_id       String?  // ID of the survey response or other source
+  status          String   @default("pending") // pending, paid, failed
+  created_at      DateTime @default(now())
+  processed_at    DateTime?
+  
+  // Payment Details
+  payment_method  String?  // crypto, paypal, bank_transfer
+  transaction_id  String?
+  
+  // Relations
+  player          User     @relation(fields: [player_id], references: [id])
+  
+  @@map("earnings")
+}
