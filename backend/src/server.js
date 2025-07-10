@@ -40,6 +40,68 @@ const surveyResponses = new Map();
 // API Keys
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
+// ROOT ROUTE - Welcome page for gamesyncsphere-production.up.railway.app
+app.get('/', (req, res) => {
+  res.json({
+    message: '🎮 Welcome to GameSyncSphere - Revolutionary AI Gaming Analytics',
+    status: 'online',
+    version: '2.0.0',
+    timestamp: new Date().toISOString(),
+    description: 'The world\'s first player-compensated gaming analytics platform powered by Claude AI',
+    revolutionaryFeatures: [
+      '🤖 Claude AI Survey Generation - Personalized surveys based on gaming behavior',
+      '💰 Player Data Monetization - Earn money for sharing gaming insights',
+      '🎯 Context-Aware Analytics - Real-time gaming performance tracking',
+      '🌐 Cross-Platform Integration - PC, Console, Mobile support',
+      '🔗 Decentralized Infrastructure - Built on IoTeX DePIN technology',
+      '🎉 WebRTC Party System - Real-time voice/video communication'
+    ],
+    liveStats: {
+      activeParties: activeParties.size,
+      activeUsers: activeUsers.size,
+      activeSurveys: activeSurveys.size,
+      totalSurveyResponses: surveyResponses.size
+    },
+    aiIntegration: {
+      provider: 'Claude by Anthropic',
+      enabled: !!ANTHROPIC_API_KEY,
+      capabilities: [
+        'Dynamic survey generation',
+        'Gaming context analysis', 
+        'Personalized question creation',
+        'Revenue optimization'
+      ]
+    },
+    apiEndpoints: {
+      health: 'GET /health',
+      test: 'GET /api/test',
+      survey: {
+        generate: 'POST /api/survey/generate',
+        submit: 'POST /api/survey/:surveyId/submit',
+        playerHistory: 'GET /api/player/:playerId/surveys'
+      },
+      party: {
+        create: 'POST /api/party/create',
+        join: 'POST /api/party/join',
+        discover: 'GET /api/party/discover'
+      },
+      analytics: {
+        player: 'GET /api/analytics/player/:playerId'
+      }
+    },
+    quickStart: {
+      testAPI: '/api/test',
+      generateAISurvey: '/api/survey/generate',
+      healthCheck: '/health'
+    },
+    links: {
+      github: 'https://github.com/ConWan30/GameSyncSphere',
+      documentation: 'Coming soon - Revolutionary gaming analytics platform'
+    },
+    footer: 'Built with ❤️ for the gaming community - Powered by Claude AI'
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ 
@@ -111,7 +173,6 @@ MAXIMUM QUESTIONS: ${maxQuestions}
 Create ${maxQuestions} highly personalized questions that feel natural and generate valuable business insights.
 
 Respond with ONLY valid JSON in this exact format:
-
 {
   "questions": [
     {
@@ -131,7 +192,7 @@ Respond with ONLY valid JSON in this exact format:
 }`;
 
     console.log('Calling Claude API...');
-
+    
     // Call Claude API with corrected format
     const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages', {
       model: 'claude-3-haiku-20240307',
@@ -256,7 +317,6 @@ app.post('/api/survey/:surveyId/submit', async (req, res) => {
   try {
     const { surveyId } = req.params;
     const { responses, playerId } = req.body;
-
     const survey = activeSurveys.get(surveyId);
     
     if (!survey) {
@@ -329,13 +389,13 @@ app.post('/api/survey/:surveyId/submit', async (req, res) => {
 // Get player's survey history and earnings
 app.get('/api/player/:playerId/surveys', (req, res) => {
   const { playerId } = req.params;
-
+  
   const playerSurveys = Array.from(activeSurveys.values())
     .filter(survey => survey.playerId === playerId);
-
+  
   const playerResponses = Array.from(surveyResponses.values())
     .filter(response => response.playerId === playerId);
-
+  
   const totalEarnings = playerResponses.reduce((sum, response) => sum + response.totalEarnings, 0);
 
   res.json({
@@ -398,7 +458,7 @@ app.get('/api/analytics/player/:playerId', (req, res) => {
   });
 });
 
-// Party system endpoints (unchanged)
+// Party system endpoints
 app.post('/api/party/create', (req, res) => {
   const { 
     creatorId, 
@@ -439,11 +499,9 @@ app.post('/api/party/join', (req, res) => {
   if (!party) {
     return res.status(404).json({ error: 'Party not found' });
   }
-
   if (party.members.length >= party.maxPlayers) {
     return res.status(400).json({ error: 'Party is full' });
   }
-
   if (party.members.includes(playerId)) {
     return res.status(400).json({ error: 'Already in party' });
   }
@@ -461,7 +519,7 @@ app.post('/api/party/join', (req, res) => {
 
 app.get('/api/party/discover', (req, res) => {
   const { gameContext, playerId } = req.query;
-
+  
   const availableParties = Array.from(activeParties.values())
     .filter(party => 
       !party.isPrivate && 
@@ -484,6 +542,25 @@ app.get('/api/party/discover', (req, res) => {
     recommendation: availableParties.length > 0 ? 
       'Join a party or create your own!' : 
       'Be the first to create a party for this game!'
+  });
+});
+
+// 404 handler for unknown API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({
+    error: 'API endpoint not found',
+    message: `The endpoint ${req.originalUrl} does not exist`,
+    availableEndpoints: [
+      'GET /health',
+      'GET /api/test', 
+      'POST /api/survey/generate',
+      'POST /api/survey/:surveyId/submit',
+      'GET /api/player/:playerId/surveys',
+      'POST /api/party/create',
+      'POST /api/party/join',
+      'GET /api/party/discover',
+      'GET /api/analytics/player/:playerId'
+    ]
   });
 });
 
@@ -521,6 +598,7 @@ server.listen(PORT, () => {
   console.log(`🚀 GameSyncSphere API with Claude AI running on port ${PORT}`);
   console.log(`🤖 Claude AI Survey Generation: ${ANTHROPIC_API_KEY ? 'ENABLED' : 'DISABLED'}`);
   console.log(`🏥 Health check: http://localhost:${PORT}/health`);
+  console.log(`🌍 Live at: https://gamesyncsphere-production.up.railway.app/`);
 });
 
 module.exports = app;
