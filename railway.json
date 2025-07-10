@@ -3,9 +3,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "node backend/src/server.js",
+    "startCommand": "npm run start:production",
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 300,
-    "restartPolicyType": "ON_FAILURE"
+    "healthcheckTimeout": 300
   }
 }
