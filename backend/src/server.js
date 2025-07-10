@@ -154,8 +154,8 @@ CRITICAL: Respond with ONLY valid JSON in this exact format:
 Make each question specific, valuable, and worth the player's time. Focus on insights that gaming companies would actually pay premium prices for.`;
 
     // Call Claude API
-    const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages', {
-      model: 'claude-3-sonnet-20240229',
+const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages', {
+  model: 'claude-3-sonnet-20240229',
       max_tokens: 2000,
       messages: [
         {
