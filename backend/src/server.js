@@ -153,9 +153,24 @@ CRITICAL: Respond with ONLY valid JSON in this exact format:
 
 Make each question specific, valuable, and worth the player's time. Focus on insights that gaming companies would actually pay premium prices for.`;
 
-    // Call Claude API
+    // Call Claude API with corrected format for Sonnet
 const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages', {
   model: 'claude-3-sonnet-20240229',
+  max_tokens: 2000,
+  messages: [
+    {
+      role: 'user',
+      content: claudePrompt
+    }
+  ],
+  system: "You are an expert gaming survey designer. Respond only with valid JSON, no markdown formatting or extra text."
+}, {
+  headers: {
+    'x-api-key': ANTHROPIC_API_KEY,
+    'Content-Type': 'application/json',
+    'anthropic-version': '2023-06-01'
+  }
+});
   max_tokens: 1500,
   messages: [
     {
