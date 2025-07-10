@@ -66,10 +66,10 @@ app.get('/api/test', (req, res) => {
       'Wellness Monitoring',
       'Decentralized Communication',
       'WebRTC Party System',
-      'Claude AI Survey Generation',    // NEW!
-      'Context-Aware Surveys',          // NEW!
-      'Dynamic Player Rewards',         // NEW!
-      'B2B Insights Marketplace'        // NEW!
+      'Claude AI Survey Generation',
+      'Context-Aware Surveys',
+      'Dynamic Player Rewards',
+      'B2B Insights Marketplace'
     ],
     aiProvider: 'Powered by Claude (Anthropic)'
   });
@@ -84,7 +84,7 @@ app.post('/api/survey/generate', async (req, res) => {
       playerState = {},
       targetInsights = ['equipment_satisfaction', 'game_enjoyment'],
       surveyPersonality = 'casual',
-      maxQuestions = 5
+      maxQuestions = 4
     } = req.body;
 
     if (!ANTHROPIC_API_KEY) {
@@ -103,95 +103,46 @@ PLAYER CONTEXT:
 - Performance Level: ${gameContext.performance || 'average'}
 - Gaming Platforms: ${playerState.platforms ? playerState.platforms.join(', ') : 'PC, Console'}
 - Favorite Games: ${playerState.favoriteGames ? playerState.favoriteGames.join(', ') : 'FPS, Strategy games'}
-- Player Wellness Score: ${playerState.wellnessScore || 7.5}/10
 
 TARGET BUSINESS INSIGHTS: ${targetInsights.join(', ')}
-SURVEY PERSONALITY: ${surveyPersonality} (make questions feel natural and conversational)
+SURVEY PERSONALITY: ${surveyPersonality}
 MAXIMUM QUESTIONS: ${maxQuestions}
 
-Create ${maxQuestions} highly personalized questions that:
-1. Feel natural and contextual to their recent gaming experience
-2. Generate valuable insights for game developers and hardware companies
-3. Have clear monetary value for data buyers
-4. Respect the player's time and gaming context
+Create ${maxQuestions} highly personalized questions that feel natural and generate valuable business insights.
 
-Each question should earn the player money based on its value to businesses.
-
-CRITICAL: Respond with ONLY valid JSON in this exact format:
+Respond with ONLY valid JSON in this exact format:
 
 {
   "questions": [
     {
       "id": "q1",
       "type": "rating_scale",
-      "text": "After your ${gameContext.sessionTime || 60}-minute ${gameContext.game || 'gaming'} session, how would you rate your controller's responsiveness during intense moments?",
-      "context": "Generated because player just completed a gaming session with specific performance data",
+      "text": "After your ${gameContext.sessionTime || 60}-minute ${gameContext.game || 'gaming'} session, how satisfied were you with your equipment's performance?",
+      "context": "Generated based on recent gaming session",
       "options": [1, 2, 3, 4, 5],
       "labels": ["Very Poor", "Poor", "Average", "Good", "Excellent"],
-      "revenueValue": 12.50,
-      "buyerInterest": ["Logitech", "Razer", "Game developers"],
-      "dataValue": "High - Hardware performance feedback"
-    },
-    {
-      "id": "q2", 
-      "type": "multiple_choice",
-      "text": "Which aspect of ${gameContext.game || 'your current game'} do you think needs the most improvement?",
-      "context": "Game-specific feedback valuable to developers",
-      "options": ["Graphics", "Gameplay mechanics", "Matchmaking", "Audio design", "User interface"],
-      "revenueValue": 15.75,
-      "buyerInterest": ["Game developers", "Publishers"],
-      "dataValue": "Very High - Direct game improvement insights"
+      "revenueValue": 15.50,
+      "buyerInterest": ["Hardware companies", "Game developers"]
     }
   ],
   "estimatedCompletionTime": 3,
-  "totalEarnings": 67.25,
-  "completionRate": 0.89,
-  "aiProvider": "Claude",
-  "personalizedFor": "${playerId}",
-  "businessValue": "High-value gaming insights for hardware and software companies"
-}
+  "totalEarnings": 45.25,
+  "completionRate": 0.89
+}`;
 
-Make each question specific, valuable, and worth the player's time. Focus on insights that gaming companies would actually pay premium prices for.`;
+    console.log('Calling Claude API...');
 
-    // Call Claude API with corrected format for Sonnet
-const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages', {
-  model: 'claude-3-sonnet-20240229',
-  max_tokens: 2000,
-  messages: [
-    {
-      role: 'user',
-      content: claudePrompt
-    }
-  ],
-  system: "You are an expert gaming survey designer. Respond only with valid JSON, no markdown formatting or extra text."
-}, {
-  headers: {
-    'x-api-key': ANTHROPIC_API_KEY,
-    'Content-Type': 'application/json',
-    'anthropic-version': '2023-06-01'
-  }
-});
-  max_tokens: 1500,
-  messages: [
-    {
-      role: 'user', 
-      content: claudePrompt
-    }
-  ]
-}, {
-  headers: {
-    'x-api-key': ANTHROPIC_API_KEY,
-    'Content-Type': 'application/json',
-    'anthropic-version': '2023-06-01'
-  }
-});
+    // Call Claude API with corrected format
+    const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages', {
+      model: 'claude-3-sonnet-20240229',
       max_tokens: 2000,
       messages: [
         {
           role: 'user',
           content: claudePrompt
         }
-      ]
+      ],
+      system: "You are an expert gaming survey designer. Respond only with valid JSON, no markdown formatting or extra text."
     }, {
       headers: {
         'x-api-key': ANTHROPIC_API_KEY,
@@ -200,45 +151,56 @@ const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages',
       }
     });
 
-    // Parse Claude response
+    console.log('Claude API response received');
+
+    // Parse Claude response with better error handling
     let aiSurveyData;
     try {
       const claudeText = claudeResponse.data.content[0].text.trim();
-      // Remove any markdown formatting if present
-      const cleanJson = claudeText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+      console.log('Claude raw response:', claudeText);
+      
+      // Remove any markdown formatting
+      const cleanJson = claudeText
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .replace(/^[^{]*/, '')
+        .replace(/[^}]*$/, '}');
+      
       aiSurveyData = JSON.parse(cleanJson);
+      console.log('Successfully parsed Claude response');
+      
     } catch (parseError) {
       console.error('Claude response parsing error:', parseError);
+      console.error('Raw Claude response:', claudeResponse.data);
+      
       // Enhanced fallback survey
       aiSurveyData = {
         questions: [
           {
             id: 'q1',
             type: 'rating_scale',
-            text: `How satisfied are you with your gaming experience during your recent ${gameContext.game || 'gaming'} session?`,
-            context: 'Claude AI-generated personalized question',
+            text: `How satisfied are you with your ${gameContext.game || 'gaming'} experience?`,
+            context: 'Claude fallback - personalized for your gaming context',
             options: [1, 2, 3, 4, 5],
-            labels: ['Very Unsatisfied', 'Unsatisfied', 'Neutral', 'Satisfied', 'Very Satisfied'],
+            labels: ['Very Poor', 'Poor', 'Average', 'Good', 'Excellent'],
             revenueValue: 18.00,
-            buyerInterest: ['Game developers', 'Gaming hardware companies'],
+            buyerInterest: ['Game developers'],
             dataValue: 'High - Player satisfaction metrics'
           },
           {
             id: 'q2',
             type: 'multiple_choice',
-            text: 'What gaming hardware upgrade are you most likely to consider next?',
-            context: 'Hardware purchase intent - highly valuable to manufacturers',
-            options: ['Gaming headset', 'Mouse', 'Keyboard', 'Monitor', 'Graphics card', 'None'],
+            text: 'What gaming hardware upgrade interests you most?',
+            context: 'Hardware purchase intent - valuable to manufacturers',
+            options: ['Gaming Headset', 'Gaming Mouse', 'Mechanical Keyboard', 'Gaming Monitor', 'Graphics Card'],
             revenueValue: 22.50,
-            buyerInterest: ['Razer', 'Logitech', 'NVIDIA', 'Hardware retailers'],
-            dataValue: 'Very High - Purchase intent data'
+            buyerInterest: ['Hardware manufacturers'],
+            dataValue: 'Very High - Purchase intent'
           }
         ],
         estimatedCompletionTime: 3,
         totalEarnings: 40.50,
-        completionRate: 0.87,
-        aiProvider: 'Claude',
-        personalizedFor: playerId
+        completionRate: 0.87
       };
     }
 
@@ -251,7 +213,7 @@ const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages',
       playerState,
       questions: aiSurveyData.questions,
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       status: 'active',
       aiGenerated: true,
       aiProvider: 'Claude',
@@ -273,17 +235,18 @@ const claudeResponse = await axios.post('https://api.anthropic.com/v1/messages',
         expiresAt: survey.expiresAt,
         aiProvider: 'Claude by Anthropic'
       },
-      revolutionaryFeature: 'World\'s first Claude AI-generated gaming surveys based on real player context!',
-      message: 'Claude AI generated a personalized survey based on your gaming behavior',
-      innovation: 'Player-compensated data economy powered by advanced AI'
+      revolutionaryFeature: 'World\'s first Claude AI-generated gaming surveys!',
+      message: 'Claude AI generated a personalized survey based on your gaming behavior'
     });
 
   } catch (error) {
     console.error('Claude AI Survey generation error:', error.message);
+    console.error('Full error:', error.response?.data || error);
+    
     res.status(500).json({ 
       error: 'Failed to generate Claude AI survey',
       details: error.response?.data?.error || error.message,
-      message: 'Claude AI survey generation temporarily unavailable'
+      message: 'Claude AI survey generation failed - check logs'
     });
   }
 });
@@ -304,7 +267,7 @@ app.post('/api/survey/:surveyId/submit', async (req, res) => {
       return res.status(400).json({ error: 'Survey already completed' });
     }
 
-    // Calculate earnings based on responses
+    // Calculate earnings
     let totalEarnings = 0;
     const processedResponses = [];
 
@@ -317,8 +280,7 @@ app.post('/api/survey/:surveyId/submit', async (req, res) => {
           question: question.text,
           response,
           earningValue: question.revenueValue || 0,
-          buyerInterest: question.buyerInterest || [],
-          dataValue: question.dataValue || 'Standard'
+          buyerInterest: question.buyerInterest || []
         });
       }
     });
@@ -343,22 +305,16 @@ app.post('/api/survey/:surveyId/submit', async (req, res) => {
 
     res.json({
       success: true,
-      message: '🎉 Survey completed! Claude AI helped you earn money from your gaming insights!',
+      message: '🎉 Survey completed! You earned money from your gaming insights!',
       earnings: {
-        amount: totalEarnings,
+        amount: totalEarnings.toFixed(2),
         currency: 'USD',
         questionsAnswered: processedResponses.length,
         paymentStatus: 'processed',
         aiProvider: 'Claude'
       },
-      impact: `Your responses help improve ${survey.gameContext.game || 'gaming experiences'} for millions of players`,
       revolutionaryFeature: 'World\'s first Claude AI-powered player compensation system!',
-      buyerInterest: [...new Set(processedResponses.flatMap(r => r.buyerInterest))],
-      nextSteps: [
-        'Earnings added to your GameSyncSphere wallet',
-        'Data anonymized and prepared for business insights',
-        'You can take more surveys to earn additional money'
-      ]
+      buyerInterest: [...new Set(processedResponses.flatMap(r => r.buyerInterest))]
     });
 
   } catch (error) {
@@ -381,14 +337,12 @@ app.get('/api/player/:playerId/surveys', (req, res) => {
     .filter(response => response.playerId === playerId);
 
   const totalEarnings = playerResponses.reduce((sum, response) => sum + response.totalEarnings, 0);
-  const claudeGeneratedSurveys = playerSurveys.filter(s => s.aiProvider === 'Claude').length;
 
   res.json({
     playerId,
     surveyStats: {
       totalSurveys: playerSurveys.length,
       completedSurveys: playerResponses.length,
-      claudeGeneratedSurveys,
       totalEarnings: totalEarnings.toFixed(2),
       averageEarningsPerSurvey: playerResponses.length > 0 ? (totalEarnings / playerResponses.length).toFixed(2) : 0,
       aiProvider: 'Claude by Anthropic'
@@ -398,65 +352,26 @@ app.get('/api/player/:playerId/surveys', (req, res) => {
       estimatedEarnings: s.estimatedEarnings,
       estimatedTime: s.estimatedCompletionTime,
       gameContext: s.gameContext,
-      expiresAt: s.expiresAt,
-      aiProvider: s.aiProvider
+      expiresAt: s.expiresAt
     })),
     completedSurveys: playerResponses.map(r => ({
       surveyId: r.surveyId,
       earnings: r.totalEarnings.toFixed(2),
       completedAt: r.submittedAt,
-      gameContext: r.gameContext,
-      aiProvider: r.aiProvider
+      gameContext: r.gameContext
     })),
     revolutionaryFeatures: [
       'Claude AI generates surveys based on your gaming behavior',
       'Earn money for every survey response',
-      'Your data helps improve games and hardware',
-      'Full transparency on data usage and earnings'
+      'Full transparency on earnings and data usage'
     ]
   });
 });
 
-// B2B: Get survey insights for businesses  
-app.get('/api/b2b/survey-insights', (req, res) => {
-  const { gameContext, targetInsight } = req.query;
-
-  const relevantResponses = Array.from(surveyResponses.values())
-    .filter(response => 
-      !gameContext || response.gameContext.game === gameContext
-    );
-
-  const totalPlayerCompensation = relevantResponses.reduce((sum, r) => sum + r.totalEarnings, 0);
-
-  res.json({
-    businessInsights: {
-      totalResponses: relevantResponses.length,
-      gameContext: gameContext || 'all_games',
-      playerCompensationPaid: totalPlayerCompensation.toFixed(2),
-      dataGenerationMethod: 'Claude AI-powered personalized surveys',
-      anonymizedInsights: relevantResponses.map(r => ({
-        gameContext: r.gameContext,
-        responseCount: r.responses.length,
-        submittedAt: r.submittedAt,
-        aiProvider: r.aiProvider
-      }))
-    },
-    revolutionary: 'First platform where businesses buy insights from AI-generated, player-compensated surveys',
-    ethicalDataEconomy: 'Players are compensated fairly for their valuable gaming insights',
-    aiAdvantage: 'Claude AI ensures surveys are contextual, relevant, and high-value'
-  });
-});
-
-// Enhanced analytics with AI survey integration
+// Enhanced analytics
 app.get('/api/analytics/player/:playerId', (req, res) => {
   const { playerId } = req.params;
   
-  const playerSurveys = Array.from(activeSurveys.values())
-    .filter(survey => survey.playerId === playerId);
-  
-  const playerResponses = Array.from(surveyResponses.values())
-    .filter(response => response.playerId === playerId);
-
   res.json({
     playerId,
     message: 'Enhanced analytics with Claude AI survey integration',
@@ -473,20 +388,17 @@ app.get('/api/analytics/player/:playerId', (req, res) => {
       aiSurveyIntegration: {
         enabled: !!ANTHROPIC_API_KEY,
         provider: 'Claude by Anthropic',
-        totalSurveys: playerSurveys.length,
-        totalEarnings: playerResponses.reduce((sum, r) => sum + r.totalEarnings, 0).toFixed(2),
         features: [
           'Context-aware survey generation',
           'Real-time earnings tracking',
-          'Personalized gaming insights',
-          'Ethical data monetization'
+          'Personalized gaming insights'
         ]
       }
     }
   });
 });
 
-// Keep all existing party system endpoints unchanged
+// Party system endpoints (unchanged)
 app.post('/api/party/create', (req, res) => {
   const { 
     creatorId, 
@@ -540,13 +452,6 @@ app.post('/api/party/join', (req, res) => {
   party.status = party.members.length === party.maxPlayers ? 'full' : 'waiting_for_players';
   activeParties.set(partyId, party);
 
-  io.to(`party_${partyId}`).emit('player_joined', {
-    playerId,
-    playerName,
-    currentMembers: party.members,
-    partyStatus: party.status
-  });
-
   res.json({
     success: true,
     party,
@@ -582,7 +487,7 @@ app.get('/api/party/discover', (req, res) => {
   });
 });
 
-// WebSocket handling (unchanged)
+// WebSocket handling
 io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
   
