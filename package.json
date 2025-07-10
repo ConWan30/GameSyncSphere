@@ -4,10 +4,7 @@
   "description": "Revolutionary Gaming Analytics & AI-Powered Data Monetization Platform",
   "main": "backend/src/server.js",
   "scripts": {
-    "start:production": "npm run build:frontend && cd backend && node src/server.js",
-    "build:frontend": "cd frontend && npm install && npm run build",
     "start": "cd backend && node src/server.js",
-    "build": "npm run build:frontend",
     "postinstall": "cd backend && npm install"
   },
   "dependencies": {
