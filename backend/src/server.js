@@ -5,7 +5,6 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -82,7 +81,7 @@ app.get('/api/analytics/player/:playerId', (req, res) => {
   });
 });
 
-// NEW: Decentralized Communication Endpoints
+// Decentralized Communication Endpoints
 
 // Create a new party
 app.post('/api/party/create', (req, res) => {
@@ -207,16 +206,6 @@ app.get('/api/party/:partyId/status', (req, res) => {
     isActive: true,
     webrtcConnections: party.members.length > 1 ? 'establishing' : 'waiting_for_members'
   });
-});
-
-// Serve React frontend
-app.use(express.static(path.join(__dirname, '../../frontend/build')));
-
-// Handle React routing
-app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api') && !req.path.startsWith('/health')) {
-    res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
-  }
 });
 
 // WebRTC Signaling support via WebSocket
