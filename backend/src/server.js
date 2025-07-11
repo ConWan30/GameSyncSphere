@@ -2,6 +2,7 @@ const express = require("express")
 const cors = require("cors")
 const crypto = require("crypto")
 const axios = require("axios")
+const path = require("path")
 require("dotenv").config()
 
 const app = express()
@@ -32,6 +33,13 @@ app.use((req, res, next) => {
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin")
   next()
 })
+
+// Serve Next.js static files
+const nextStaticPath = path.join(__dirname, "../../.next/static")
+const nextPublicPath = path.join(__dirname, "../../public")
+
+app.use("/_next/static", express.static(nextStaticPath))
+app.use("/public", express.static(nextPublicPath))
 
 // In-memory storage (fallback)
 const users = new Map()
