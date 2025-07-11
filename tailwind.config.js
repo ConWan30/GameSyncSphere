@@ -19,11 +19,6 @@ module.exports = {
     },
     extend: {
       colors: {
-        charcoal: "#0A0A0A",
-        gunmetal: "#2A2A2A",
-        silver: "#A9A9A9",
-        "glow-blue": "#1E3A8A",
-        "bright-blue": "#3B82F6",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -57,6 +52,7 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        charcoal: "#1a1a1a",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -72,27 +68,27 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-20px)" },
-        },
-        "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(59, 130, 246, 0.3)" },
-          "50%": { boxShadow: "0 0 30px rgba(59, 130, 246, 0.6)" },
+        holographic: {
+          "0%, 100%": {
+            "background-position": "0% 50%",
+            "box-shadow": "0 0 20px rgba(59, 130, 246, 0.5)",
+          },
+          "50%": {
+            "background-position": "100% 50%",
+            "box-shadow": "0 0 30px rgba(147, 51, 234, 0.5)",
+          },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        float: "float 6s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
-      },
-      fontFamily: {
-        orbitron: ["Orbitron", "sans-serif"],
-        inter: ["Inter", "sans-serif"],
+        holographic: "holographic 3s ease-in-out infinite",
       },
       backgroundImage: {
-        "holographic-gradient": "linear-gradient(135deg, rgba(42, 42, 42, 0.8) 0%, rgba(10, 10, 10, 0.9) 100%)",
+        holographic: "linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)",
+      },
+      backgroundSize: {
+        "400%": "400% 400%",
       },
     },
   },
