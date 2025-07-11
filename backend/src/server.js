@@ -119,60 +119,99 @@ async function generateRecentInsights(companyId) {
   ];
 }
 
-// Root route
-app.get('/', (req, res) => {
-  res.json({
-    message: '🎮 GameSyncSphere - Revolutionary AI Gaming Analytics & Earning Platform!',
-    status: 'healthy',
-    version: '5.1.0',
-    timestamp: new Date().toISOString(),
-    description: 'The world\'s first player-compensated gaming analytics platform powered by Claude AI',
-    revolutionaryFeatures: [
-      '🔐 Secure User Authentication',
-      '🤖 Claude AI Survey Generation',
-      '💰 Real Player Earnings System',
-      '🎯 Experience-Based Bonuses',
-      '🗄️ PostgreSQL Database Integration',
-      '📊 Complete Earnings Tracking',
-      '🏢 B2B Company Integration',
-      '💼 Enterprise Survey Marketplace'
-    ],
-    system: {
-      database: databaseReady ? 'PostgreSQL Connected' : 'In-Memory Fallback',
-      authentication: 'Secure Token-Based',
-      aiProvider: 'Claude by Anthropic',
-      storage: databaseReady ? 'Permanent' : 'Temporary'
-    },
-    stats: {
-      registeredUsers: users.size,
-      registeredCompanies: companies.size,
-      activeSessions: sessions.size,
-      databaseStatus: databaseReady ? 'Connected' : 'Initializing'
-    },
-    quickStart: {
-      playerRegister: 'POST /api/auth/register',
-      playerLogin: 'POST /api/auth/login',
-      companyRegister: 'POST /api/companies/register',
-      companyLogin: 'POST /api/companies/login',
-      generateSurvey: 'POST /api/survey/generate (requires auth)',
-      createSurveyRequest: 'POST /api/companies/survey-requests (requires company auth)',
-      viewEarnings: 'GET /api/user/surveys (requires auth)',
-      companyDashboard: 'GET /api/companies/dashboard (requires company auth)'
-    }
-  });
+// Proxy to Vercel website - UPDATED ROOT ROUTE
+app.get('/', async (req, res) => {
+  try {
+    console.log('🌐 Proxying request to Vercel website...');
+    const response = await axios.get('https://gamesyncsphere-analytics.vercel.app/', {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'GameSyncSphere-Proxy/1.0'
+      }
+    });
+    
+    // Modify the HTML to ensure proper asset loading
+    let html = response.data;
+    
+    // Replace relative paths with Vercel domain for assets
+    html = html.replace(/href="\/_next/g, 'href="https://gamesyncsphere-analytics.vercel.app/_next');
+    html = html.replace(/src="\/_next/g, 'src="https://gamesyncsphere-analytics.vercel.app/_next');
+    html = html.replace(/src="\/favicon/g, 'src="https://gamesyncsphere-analytics.vercel.app/favicon');
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+    
+  } catch (error) {
+    console.error('❌ Proxy error:', error.message);
+    
+    // Fallback response if Vercel is down
+    res.status(200).json({
+      message: '🎮 GameSyncSphere - Revolutionary AI Gaming Analytics Platform!',
+      status: 'healthy',
+      version: '6.0.0',
+      timestamp: new Date().toISOString(),
+      description: 'The world\'s first player-compensated gaming analytics platform powered by Claude AI',
+      
+      website: {
+        status: 'Website temporarily loading from backup',
+        primary: 'https://gamesyncsphere-analytics.vercel.app/',
+        message: 'Visit our beautiful website at the link above'
+      },
+      
+      revolutionaryFeatures: [
+        '🔐 Secure User Authentication',
+        '🤖 Claude AI Survey Generation', 
+        '💰 Real Player Earnings System',
+        '🎯 Experience-Based Bonuses',
+        '🗄️ PostgreSQL Database Integration',
+        '📊 Complete Earnings Tracking',
+        '🏢 B2B Company Integration',
+        '💼 Enterprise Survey Marketplace',
+        '🌐 Beautiful Gaming Website'
+      ],
+      
+      system: {
+        database: databaseReady ? 'PostgreSQL Connected' : 'In-Memory Fallback',
+        authentication: 'Secure Token-Based',
+        aiProvider: 'Claude by Anthropic',
+        storage: databaseReady ? 'Permanent' : 'Temporary',
+        website: 'Hosted on Vercel + Proxied through Railway'
+      },
+      
+      stats: {
+        registeredUsers: users.size,
+        registeredCompanies: companies.size,
+        activeSessions: sessions.size,
+        databaseStatus: databaseReady ? 'Connected' : 'Initializing'
+      },
+      
+      quickStart: {
+        website: 'https://gamesyncsphere-analytics.vercel.app/',
+        playerRegister: 'POST /api/auth/register',
+        playerLogin: 'POST /api/auth/login',
+        companyRegister: 'POST /api/companies/register',
+        companyLogin: 'POST /api/companies/login',
+        generateSurvey: 'POST /api/survey/generate (requires auth)',
+        createSurveyRequest: 'POST /api/companies/survey-requests (requires company auth)',
+        viewEarnings: 'GET /api/user/surveys (requires auth)',
+        companyDashboard: 'GET /api/companies/dashboard (requires company auth)'
+      }
+    });
+  }
 });
 
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'healthy',
-    message: 'GameSyncSphere with B2B integration ready',
+    message: 'GameSyncSphere with B2B integration and website proxy ready',
     timestamp: new Date().toISOString(),
     database: databaseReady ? 'Connected' : 'Fallback',
     users: users.size,
     companies: companies.size,
     sessions: sessions.size,
-    features: ['Player Authentication', 'Company Authentication', 'Claude AI Surveys', 'B2B Survey Marketplace', 'Database Integration', 'Earnings Tracking']
+    website: 'Proxied from Vercel',
+    features: ['Website Proxy', 'Player Authentication', 'Company Authentication', 'Claude AI Surveys', 'B2B Survey Marketplace', 'Database Integration', 'Earnings Tracking']
   });
 });
 
@@ -1132,7 +1171,7 @@ app.get('/api/platform/stats', async (req, res) => {
       timestamp: new Date().toISOString(),
       system: {
         database: databaseReady ? 'PostgreSQL Connected' : 'In-Memory Fallback',
-        version: '5.1.0',
+        version: '6.0.0',
         uptime: process.uptime()
       },
       stats: {
@@ -1141,6 +1180,7 @@ app.get('/api/platform/stats', async (req, res) => {
         averageEarningsPerUser: stats.totalUsers > 0 ? (stats.totalEarnings / stats.totalUsers).toFixed(2) : '0.00'
       },
       features: [
+        'Beautiful Website Proxy',
         'User Registration & Login',
         'Company Registration & Login',
         'Claude AI Survey Generation',
@@ -1163,7 +1203,8 @@ app.get('/api/platform/stats', async (req, res) => {
 // Test endpoint
 app.get('/api/test', (req, res) => {
   res.json({
-    message: 'GameSyncSphere with B2B Integration - Ready!',
+    message: 'GameSyncSphere with Beautiful Website + B2B Integration - Ready!',
+    website: '✅ Proxied from Vercel',
     authentication: '✅ Working',
     companyAuth: '✅ Working',
     crypto: '✅ Built-in Node.js',
@@ -1176,13 +1217,61 @@ app.get('/api/test', (req, res) => {
     b2bMarketplace: '✅ Survey Request System Ready',
     earningsTracking: '✅ Real Money System',
     persistence: databaseReady ? '✅ Permanent Storage' : '⚠️ Temporary (can migrate)',
-    ready: '✅ Ready for users and companies to earn and buy gaming insights!'
+    ready: '✅ Ready for users and companies to earn and buy gaming insights with beautiful website!'
   });
+});
+
+// Catch-all for non-API routes - Proxy other pages to Vercel
+app.get('*', async (req, res) => {
+  // Don't proxy API routes
+  if (req.path.startsWith('/api/') || req.path.startsWith('/health')) {
+    return res.status(404).json({ 
+      error: 'API endpoint not found',
+      availableEndpoints: '/api-info'
+    });
+  }
+  
+  try {
+    console.log(`🌐 Proxying ${req.path} to Vercel...`);
+    const vercelUrl = `https://gamesyncsphere-analytics.vercel.app${req.path}`;
+    
+    const response = await axios.get(vercelUrl, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'GameSyncSphere-Proxy/1.0'
+      }
+    });
+    
+    // Handle different content types
+    const contentType = response.headers['content-type'];
+    
+    if (contentType && contentType.includes('text/html')) {
+      // Modify HTML to ensure proper asset loading
+      let html = response.data;
+      html = html.replace(/href="\/_next/g, 'href="https://gamesyncsphere-analytics.vercel.app/_next');
+      html = html.replace(/src="\/_next/g, 'src="https://gamesyncsphere-analytics.vercel.app/_next');
+      html = html.replace(/src="\/favicon/g, 'src="https://gamesyncsphere-analytics.vercel.app/favicon');
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.send(html);
+    } else {
+      // For other content types (CSS, JS, images), pass through
+      res.setHeader('Content-Type', contentType || 'application/octet-stream');
+      res.send(response.data);
+    }
+    
+  } catch (error) {
+    console.error(`❌ Proxy error for ${req.path}:`, error.message);
+    
+    // Redirect to Vercel if proxy fails
+    res.redirect(`https://gamesyncsphere-analytics.vercel.app${req.path}`);
+  }
 });
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 GameSyncSphere with B2B Integration running on port ${PORT}`);
+  console.log(`🚀 GameSyncSphere with Beautiful Website + B2B Integration running on port ${PORT}`);
+  console.log(`🌐 Website: Proxying from https://gamesyncsphere-analytics.vercel.app/`);
   console.log(`🔐 Player Authentication: Secure Token-Based`);
   console.log(`🏢 Company Authentication: Secure Token-Based`);
   console.log(`🗄️ Database: ${databaseReady ? 'PostgreSQL Connected' : 'In-Memory with Migration Ready'}`);
@@ -1191,5 +1280,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`💼 B2B Marketplace: Survey Request System Active`);
   console.log(`📊 Data Storage: ${databaseReady ? 'Permanent' : 'Temporary (migration available)'}`);
   console.log(`🌍 Live at: https://gamesyncsphere-production.up.railway.app/`);
-  console.log(`🎯 Ready for players to earn money and companies to buy gaming insights!`);
+  console.log(`🎯 Ready for players to earn money and companies to buy gaming insights with beautiful website!`);
 });
