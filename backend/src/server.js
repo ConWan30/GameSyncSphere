@@ -96,7 +96,6 @@ function generateToken() {
 }
 
 function calculateEstimatedReach(targetAudience) {
-  // Simple algorithm to estimate player reach based on criteria
   let baseReach = 100;
   if (targetAudience.platforms) baseReach *= targetAudience.platforms.length;
   if (targetAudience.games) baseReach *= Math.min(targetAudience.games.length, 3);
@@ -104,7 +103,6 @@ function calculateEstimatedReach(targetAudience) {
 }
 
 async function generateRecentInsights(companyId) {
-  // Generate sample insights for B2B dashboard
   return [
     {
       type: 'Player Behavior',
@@ -454,21 +452,18 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Company Registration - FIXED VERSION
+// Company Registration
 app.post('/api/companies/register', async (req, res) => {
   try {
     const {
       companyName,
       email,
       password,
-      companyType, // 'game_developer', 'hardware_manufacturer', 'research_firm'
+      companyType,
       website,
-      description,
-      employeeCount,
-      industry
+      description
     } = req.body;
 
-    // Validation
     if (!companyName || !email || !password || !companyType) {
       return res.status(400).json({
         error: 'Missing required fields',
@@ -514,7 +509,6 @@ app.post('/api/companies/register', async (req, res) => {
       }
     }
 
-    // ALWAYS create memory backup regardless of database status
     if (!company) {
       company = {
         id: companyId,
@@ -531,10 +525,9 @@ app.post('/api/companies/register', async (req, res) => {
       };
     }
 
-    // CRITICAL FIX: Store in memory by both email AND id for lookup
     companies.set(email, company);
     companies.set(company.id, company);
-    console.log(`📝 Company stored in memory: ${companyName} (ID: ${company.id})`);
+    console.log(`📝 Company stored in memory: ${companyName}`);
 
     const token = generateToken();
     sessions.set(token, {
@@ -589,18 +582,7 @@ app.post('/api/companies/login', async (req, res) => {
     if (databaseReady && prisma) {
       try {
         company = await prisma.company.findUnique({
-          where: { email },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            password_hash: true,
-            company_type: true,
-            verified: true,
-            total_spent: true,
-            current_budget: true,
-            created_at: true
-          }
+          where: { email }
         });
 
         if (company && company.password_hash === hashPassword(password)) {
@@ -619,7 +601,7 @@ app.post('/api/companies/login', async (req, res) => {
       }
     }
 
-    if (!company || (company.password_hash !== hashPassword(password))) {
+    if (!company || company.password_hash !== hashPassword(password)) {
       return res.status(401).json({
         error: 'Invalid credentials',
         message: 'Email or password is incorrect'
@@ -703,7 +685,7 @@ async function authenticateUser(req, res, next) {
   }
 }
 
-// Authentication middleware for companies - FIXED VERSION
+// Authentication middleware for companies
 async function authenticateCompany(req, res, next) {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -725,22 +707,17 @@ async function authenticateCompany(req, res, next) {
     
     let company = null;
     
-    // Try database first
     if (databaseReady && prisma) {
       try {
-        company = await prisma.company.findUnique({ 
-          where: { id: session.companyId }
-        });
+        company = await prisma.company.findUnique({ where: { id: session.companyId } });
       } catch (dbError) {
         console.error('Database company lookup failed:', dbError);
       }
     }
     
-    // Fallback to memory storage - SEARCH BY ID
     if (!company) {
       company = companies.get(session.companyId);
       if (!company) {
-        // Also try searching by email as fallback
         company = Array.from(companies.values()).find(c => c.id === session.companyId);
       }
     }
@@ -773,27 +750,10 @@ app.get('/api/companies/dashboard', authenticateCompany, async (req, res) => {
 
     if (databaseReady && prisma) {
       try {
-        const [requests, spent, responses] = await Promise.all([
-          prisma.surveyRequest.findMany({
-            where: { company_id: req.company.id },
-            include: { generated_surveys: true }
-          }),
-          prisma.surveyRequest.aggregate({
-            where: { company_id: req.company.id },
-            _sum: { total_spent: true }
-          }),
-          prisma.surveyResponse.count({
-            where: {
-              survey: {
-                requested_by_company_id: req.company.id
-              }
-            }
-          })
-        ]);
-
+        const requests = await prisma.surveyRequest.findMany({
+          where: { company_id: req.company.id }
+        });
         surveyRequests = requests;
-        totalSpent = spent._sum.total_spent || 0;
-        activeResponses = responses;
       } catch (dbError) {
         console.error('Dashboard query error:', dbError);
       }
@@ -811,7 +771,7 @@ app.get('/api/companies/dashboard', authenticateCompany, async (req, res) => {
           totalSurveyRequests: surveyRequests.length,
           totalSpent: totalSpent,
           totalResponses: activeResponses,
-          averageCostPerResponse: activeResponses > 0 ? (totalSpent / activeResponses).toFixed(2) : '0.00'
+          averageCostPerResponse: '0.00'
         },
         activeSurveyRequests: surveyRequests.filter(sr => sr.status === 'active'),
         recentInsights: await generateRecentInsights(req.company.id),
@@ -828,195 +788,6 @@ app.get('/api/companies/dashboard', authenticateCompany, async (req, res) => {
       error: 'Failed to load dashboard'
     });
   }
-});
-
-// Create Survey Request
-app.post('/api/companies/survey-requests', authenticateCompany, async (req, res) => {
-  try {
-    const {
-      title,
-      description,
-      targetAudience, // { platforms: ['PC', 'Console'], games: ['Valorant'], minAge: 18 }
-      targetInsights, // ['hardware_satisfaction', 'gameplay_preferences']
-      budget,
-      maxResponses,
-      rewardPerResponse,
-      duration // in days
-    } = req.body;
-
-    if (!title || !description || !budget || !maxResponses) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        required: ['title', 'description', 'budget', 'maxResponses']
-      });
-    }
-
-    const platformFee = budget * 0.3; // 30% platform fee
-    const aiGenerationCost = maxResponses * 0.5; // $0.50 per AI survey
-    const totalCost = budget + platformFee + aiGenerationCost;
-    
-    const surveyRequestId = `survey_req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    let surveyRequest;
-
-    if (databaseReady && prisma) {
-      try {
-        surveyRequest = await prisma.surveyRequest.create({
-          data: {
-            company_id: req.company.id,
-            title,
-            description,
-            target_audience: targetAudience,
-            target_insights: targetInsights,
-            budget,
-            max_responses: maxResponses,
-            reward_per_response: rewardPerResponse || 15.50,
-            platform_fee: platformFee,
-            ai_generation_cost: aiGenerationCost,
-            expires_at: new Date(Date.now() + (duration || 30) * 24 * 60 * 60 * 1000)
-          }
-        });
-      } catch (dbError) {
-        console.error('Survey request creation failed:', dbError);
-      }
-    }
-
-    if (!surveyRequest) {
-      surveyRequest = {
-        id: surveyRequestId,
-        company_id: req.company.id,
-        title,
-        description,
-        target_audience: targetAudience,
-        target_insights: targetInsights,
-        budget,
-        max_responses: maxResponses,
-        reward_per_response: rewardPerResponse || 15.50,
-        platform_fee: platformFee,
-        ai_generation_cost: aiGenerationCost,
-        status: 'active',
-        expiresAt: surveyRequest.expires_at
-      }
-    });
-  } catch (error) {
-    console.error('Survey request creation error:', error);
-    res.status(500).json({
-      error: 'Failed to create survey request',
-      message: 'Unable to create survey request'
-    });
-  }
-});
-
-// Get Company Survey Requests
-app.get('/api/companies/survey-requests', authenticateCompany, async (req, res) => {
-  try {
-    let surveyRequests = [];
-
-    if (databaseReady && prisma) {
-      try {
-        surveyRequests = await prisma.surveyRequest.findMany({
-          where: { company_id: req.company.id },
-          include: { generated_surveys: true },
-          orderBy: { created_at: 'desc' }
-        });
-      } catch (dbError) {
-        console.error('Survey requests query error:', dbError);
-      }
-    }
-
-    res.json({
-      success: true,
-      surveyRequests: surveyRequests.map(sr => ({
-        id: sr.id,
-        title: sr.title,
-        description: sr.description,
-        status: sr.status,
-        budget: sr.budget,
-        maxResponses: sr.max_responses,
-        responsesReceived: sr.responses_received || 0,
-        createdAt: sr.created_at,
-        expiresAt: sr.expires_at
-      }))
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to fetch survey requests'
-    });
-  }
-});
-
-// B2B Pricing Information
-app.get('/api/companies/pricing', (req, res) => {
-  res.json({
-    success: true,
-    pricingPlans: [
-      {
-        name: 'Starter',
-        price: 500,
-        billing: 'monthly',
-        responses: 100,
-        features: [
-          'Basic Analytics Dashboard',
-          'Standard Survey Targeting',
-          'Email Support',
-          'Monthly Reports'
-        ],
-        bestFor: 'Indie developers and small studios'
-      },
-      {
-        name: 'Professional',
-        price: 2000,
-        billing: 'monthly',
-        responses: 500,
-        features: [
-          'Advanced Analytics & Insights',
-          'Custom Survey Targeting',
-          'Priority Support',
-          'API Access',
-          'Real-time Data Export',
-          'Weekly Reports'
-        ],
-        bestFor: 'Growing studios and hardware manufacturers',
-        popular: true
-      },
-      {
-        name: 'Enterprise',
-        price: 10000,
-        billing: 'monthly',
-        responses: 'Unlimited',
-        features: [
-          'Unlimited Survey Responses',
-          'Real-time Data Feeds',
-          'Custom Integrations',
-          'Dedicated Account Manager',
-          'White-label Options',
-          'Daily Reports',
-          'Custom Analytics'
-        ],
-        bestFor: 'Large publishers and enterprise clients'
-      }
-    ],
-    payPerUse: {
-      surveyResponses: {
-        price: '5-15',
-        unit: 'per response',
-        description: 'Pay only for completed survey responses'
-      },
-      premiumInsights: {
-        price: '50-200',
-        unit: 'per report',
-        description: 'Detailed analytical reports with actionable insights'
-      },
-      apiAccess: {
-        price: '0.10',
-        unit: 'per call',
-        description: 'Real-time data access via API'
-      }
-    },
-    platformFees: {
-      percentage: 30,
-      description: 'Platform fee applied to all survey budgets'
-    }
-  });
 });
 
 // Generate Claude AI Survey
@@ -1044,7 +815,7 @@ app.post('/api/survey/generate', authenticateUser, async (req, res) => {
 
 PLAYER CONTEXT:
 - Player: ${req.user.username}
-- Total earnings: ${req.user.total_earnings || req.user.totalEarnings || 0}
+- Total earnings: $${req.user.total_earnings || req.user.totalEarnings || 0}
 - Completed surveys: ${completedSurveys}
 - Experience level: ${completedSurveys < 5 ? 'Beginner' : completedSurveys < 15 ? 'Experienced' : 'Expert'}
 - Current game: ${gameContext.game || 'Various games'}
@@ -1321,14 +1092,14 @@ app.get('/api/user/surveys', authenticateUser, (req, res) => {
   });
 });
 
-// Platform Stats - Enhanced with B2B
+// Platform Stats
 app.get('/api/platform/stats', async (req, res) => {
   try {
-    let stats = { totalUsers: 0, totalEarnings: 0, totalSurveys: 0, totalCompanies: 0, totalSurveyRequests: 0 };
+    let stats = { totalUsers: 0, totalEarnings: 0, totalSurveys: 0, totalCompanies: 0 };
     
     if (databaseReady && prisma) {
       try {
-        const [userCount, userAggregates, companyCount, surveyRequestCount] = await Promise.all([
+        const [userCount, userAggregates, companyCount] = await Promise.all([
           prisma.user.count(),
           prisma.user.aggregate({
             _sum: { 
@@ -1336,16 +1107,14 @@ app.get('/api/platform/stats', async (req, res) => {
               completed_surveys: true 
             }
           }),
-          prisma.company.count(),
-          prisma.surveyRequest.count()
+          prisma.company.count()
         ]);
         
         stats = {
           totalUsers: userCount,
           totalEarnings: userAggregates._sum.total_earnings || 0,
           totalSurveys: userAggregates._sum.completed_surveys || 0,
-          totalCompanies: companyCount,
-          totalSurveyRequests: surveyRequestCount
+          totalCompanies: companyCount
         };
       } catch (dbError) {
         console.error('Database stats error:', dbError);
@@ -1424,23 +1193,3 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🌍 Live at: https://gamesyncsphere-production.up.railway.app/`);
   console.log(`🎯 Ready for players to earn money and companies to buy gaming insights!`);
 });
-        created_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + (duration || 30) * 24 * 60 * 60 * 1000).toISOString()
-      };
-    }
-
-    res.json({
-      success: true,
-      message: 'Survey request created successfully!',
-      surveyRequest: {
-        id: surveyRequest.id,
-        title: surveyRequest.title,
-        estimatedReach: calculateEstimatedReach(targetAudience || {}),
-        totalCost: totalCost,
-        breakdown: {
-          playerRewards: budget,
-          platformFee,
-          aiGenerationCost,
-          total: totalCost
-        },
-        status: 'active',
