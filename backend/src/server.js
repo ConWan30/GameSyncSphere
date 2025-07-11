@@ -23,7 +23,7 @@ async function initializeDatabase() {
   try {
     const { PrismaClient } = require('@prisma/client');
     prisma = new PrismaClient({
-      log: ['error', 'warn'],
+      log: ['error', 'warn']
     });
     
     await prisma.$connect();
@@ -34,95 +34,7 @@ async function initializeDatabase() {
     
     return true;
   } catch (error) {
-    console.error('Survey submission error:', error);
-    res.status(500).json({ 
-      error: 'Failed to submit survey',
-      details: error.message 
-    });
-  }
-});
-
-app.get('/api/user/surveys', authenticateUser, (req, res) => {
-  const completedSurveys = req.user.completed_surveys || req.user.completedSurveys || 0;
-  const totalEarnings = req.user.total_earnings || req.user.totalEarnings || 0;
-  
-  const experienceLevel = completedSurveys < 5 ? 'Beginner' : 
-                          completedSurveys < 15 ? 'Experienced' : 'Expert';
-  
-  res.json({
-    success: true,
-    user: {
-      username: req.user.username,
-      email: req.user.email,
-      memberSince: req.user.created_at ? req.user.created_at.split('T')[0] : 'Today',
-      experienceLevel,
-      storage: databaseReady ? 'Database' : 'Memory'
-    },
-    earnings: {
-      total: totalEarnings.toFixed(2),
-      completedSurveys: completedSurveys,
-      averagePerSurvey: completedSurveys > 0 ? 
-        (totalEarnings / completedSurveys).toFixed(2) : '0.00',
-      currentExperienceBonus: (completedSurveys * 0.5).toFixed(2),
-      nextLevelAt: completedSurveys < 5 ? '5 surveys (Experienced)' :
-                   completedSurveys < 15 ? '15 surveys (Expert)' : 'Maximum level reached!'
-    },
-    activeSurveys: (req.user.activeSurveys || []).map(s => ({
-      id: s.id,
-      estimatedEarnings: s.estimatedEarnings,
-      estimatedTime: s.estimatedCompletionTime,
-      gameContext: s.gameContext,
-      expiresAt: s.expiresAt,
-      experienceBonus: s.experienceBonus
-    })),
-    recentCompletedSurveys: (req.user.completedSurveyHistory || [])
-      .slice(-5)
-      .reverse()
-      .map(s => ({
-        id: s.id,
-        earnings: s.actualEarnings.toFixed(2),
-        completedAt: s.completedAt,
-        gameContext: s.gameContext,
-        questionsAnswered: s.responses.length
-      })),
-    revolutionaryFeatures: [
-      'Claude AI generates surveys based on your gaming behavior',
-      'Earn more money as you complete more surveys',
-      'Experience-based bonus system',
-      'Full transparency on earnings and data usage',
-      databaseReady ? 'Permanent database storage' : 'Will migrate to permanent storage'
-    ]
-  });
-});
-
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({
-    message: 'GameSyncSphere with Database Integration - Ready!',
-    authentication: '✅ Working',
-    crypto: '✅ Built-in Node.js',
-    database: databaseReady ? '✅ PostgreSQL Connected' : '⚠️ Fallback Mode',
-    claudeAI: process.env.ANTHROPIC_API_KEY ? '✅ Connected' : '❌ Not configured',
-    userStorage: databaseReady ? '✅ Database Ready' : '📝 In-memory with migration ready',
-    sessionManagement: '✅ Active',
-    surveySystem: '✅ Claude AI Ready',
-    earningsTracking: '✅ Real Money System',
-    persistence: databaseReady ? '✅ Permanent Storage' : '⚠️ Temporary (can migrate)',
-    ready: '✅ Ready for users to earn money with permanent accounts!'
-  });
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 GameSyncSphere with Database Integration running on port ${PORT}`);
-  console.log(`🔐 Authentication: Secure Token-Based`);
-  console.log(`🗄️ Database: ${databaseReady ? 'PostgreSQL Connected' : 'In-Memory with Migration Ready'}`);
-  console.log(`🤖 Claude AI: ${process.env.ANTHROPIC_API_KEY ? 'ENABLED' : 'DISABLED'}`);
-  console.log(`💰 Earnings System: Active with Experience Bonuses`);
-  console.log(`📊 Data Storage: ${databaseReady ? 'Permanent' : 'Temporary (migration available)'}`);
-  console.log(`🌍 Live at: https://gamesyncsphere-production.up.railway.app/`);
-  console.log(`🎯 Ready for users to register, login, and start earning money with permanent accounts!`);
-});❌ Database connection failed:', error.message);
+    console.error('❌ Database connection failed:', error.message);
     console.log('📝 Will use in-memory storage as fallback');
     return false;
   }
@@ -244,60 +156,7 @@ app.get('/api/database/init', async (req, res) => {
   }
 });
 
-app.post('/api/database/migrate', async (req, res) => {
-  try {
-    if (!databaseReady || !prisma) {
-      return res.status(500).json({
-        error: 'Database not ready',
-        message: 'Initialize database first'
-      });
-    }
-
-    const migrationResults = { users: 0, errors: [] };
-
-    for (const [email, userData] of users.entries()) {
-      try {
-        const existingUser = await prisma.user.findUnique({
-          where: { email: userData.email }
-        });
-
-        if (!existingUser) {
-          await prisma.user.create({
-            data: {
-              email: userData.email,
-              username: userData.username,
-              password_hash: userData.password,
-              full_name: userData.fullName,
-              total_earnings: userData.totalEarnings || 0,
-              completed_surveys: userData.completedSurveys || 0,
-              gaming_platforms: userData.gamingPlatforms || [],
-              favorite_games: userData.favoriteGames || []
-            }
-          });
-          migrationResults.users++;
-        }
-      } catch (userError) {
-        migrationResults.errors.push(`User ${email}: ${userError.message}`);
-      }
-    }
-
-    res.json({
-      success: true,
-      message: '🚀 Migration completed!',
-      results: migrationResults,
-      status: 'Users and data migrated to permanent database storage'
-    });
-
-  } catch (error) {
-    console.error('Migration error:', error);
-    res.status(500).json({
-      error: 'Migration failed',
-      message: error.message
-    });
-  }
-});
-
-// Authentication routes
+// User Registration
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, username, password, fullName } = req.body;
@@ -335,7 +194,8 @@ app.post('/api/auth/register', async (req, res) => {
 
         user = await prisma.user.create({
           data: {
-            email, username,
+            email,
+            username,
             password_hash: hashedPassword,
             full_name: fullName || username,
             total_earnings: 0,
@@ -344,8 +204,13 @@ app.post('/api/auth/register', async (req, res) => {
             favorite_games: []
           },
           select: {
-            id: true, email: true, username: true, full_name: true,
-            total_earnings: true, completed_surveys: true, created_at: true
+            id: true,
+            email: true,
+            username: true,
+            full_name: true,
+            total_earnings: true,
+            completed_surveys: true,
+            created_at: true
           }
         });
 
@@ -365,7 +230,9 @@ app.post('/api/auth/register', async (req, res) => {
       }
 
       user = {
-        id: userId, email, username,
+        id: userId,
+        email,
+        username,
         full_name: fullName || username,
         password: hashedPassword,
         total_earnings: 0,
@@ -383,13 +250,16 @@ app.post('/api/auth/register', async (req, res) => {
 
     const token = generateToken();
     sessions.set(token, {
-      userId: user.id, email: user.email,
+      userId: user.id,
+      email: user.email,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     });
 
     const userResponse = {
-      id: user.id, email: user.email, username: user.username,
+      id: user.id,
+      email: user.email,
+      username: user.username,
       full_name: user.full_name,
       total_earnings: user.total_earnings || 0,
       completed_surveys: user.completed_surveys || 0,
@@ -419,6 +289,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+// User Login
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -437,9 +308,17 @@ app.post('/api/auth/login', async (req, res) => {
         user = await prisma.user.findUnique({
           where: { email },
           select: {
-            id: true, email: true, username: true, full_name: true,
-            password_hash: true, total_earnings: true, completed_surveys: true,
-            gaming_platforms: true, favorite_games: true, created_at: true, is_active: true
+            id: true,
+            email: true,
+            username: true,
+            full_name: true,
+            password_hash: true,
+            total_earnings: true,
+            completed_surveys: true,
+            gaming_platforms: true,
+            favorite_games: true,
+            created_at: true,
+            is_active: true
           }
         });
 
@@ -474,13 +353,16 @@ app.post('/api/auth/login', async (req, res) => {
 
     const token = generateToken();
     sessions.set(token, {
-      userId: user.id, email: user.email,
+      userId: user.id,
+      email: user.email,
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     });
 
     const userResponse = {
-      id: user.id, email: user.email, username: user.username,
+      id: user.id,
+      email: user.email,
+      username: user.username,
       full_name: user.full_name,
       total_earnings: user.total_earnings || 0,
       completed_surveys: user.completed_surveys || 0
@@ -505,123 +387,6 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({
       error: 'Login failed',
       message: 'Unable to login. Please try again.'
-    });
-  }
-});
-
-app.get('/api/auth/profile', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    
-    if (!token) {
-      return res.status(401).json({
-        error: 'No token provided',
-        message: 'Authentication token required'
-      });
-    }
-
-    const session = sessions.get(token);
-    if (!session || new Date() > new Date(session.expiresAt)) {
-      sessions.delete(token);
-      return res.status(401).json({
-        error: 'Token expired',
-        message: 'Please login again'
-      });
-    }
-
-    let user = null;
-
-    if (databaseReady && prisma) {
-      user = await prisma.user.findUnique({
-        where: { id: session.userId },
-        select: {
-          id: true, email: true, username: true, full_name: true,
-          total_earnings: true, completed_surveys: true,
-          gaming_platforms: true, favorite_games: true, created_at: true
-        }
-      });
-    } else {
-      user = Array.from(users.values()).find(u => u.id === session.userId);
-    }
-
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json({
-      success: true,
-      user: user,
-      storage: databaseReady ? 'Database' : 'Memory',
-      session: { createdAt: session.createdAt, expiresAt: session.expiresAt }
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to get profile',
-      message: error.message
-    });
-  }
-});
-
-// Platform stats
-app.get('/api/platform/stats', async (req, res) => {
-  try {
-    let stats = { totalUsers: 0, totalEarnings: 0, totalSurveys: 0, totalCompanies: 0 };
-
-    if (databaseReady && prisma) {
-      try {
-        const [userCount, userAggregates, companyCount] = await Promise.all([
-          prisma.user.count(),
-          prisma.user.aggregate({
-            _sum: { total_earnings: true, completed_surveys: true }
-          }),
-          prisma.company.count()
-        ]);
-
-        stats = {
-          totalUsers: userCount,
-          totalEarnings: userAggregates._sum.total_earnings || 0,
-          totalSurveys: userAggregates._sum.completed_surveys || 0,
-          totalCompanies: companyCount
-        };
-      } catch (dbError) {
-        console.error('Database stats error:', dbError);
-      }
-    } else {
-      stats.totalUsers = users.size;
-      stats.totalEarnings = Array.from(users.values()).reduce((sum, user) => sum + (user.totalEarnings || 0), 0);
-      stats.totalSurveys = Array.from(users.values()).reduce((sum, user) => sum + (user.completedSurveys || 0), 0);
-    }
-    
-    res.json({
-      success: true,
-      message: 'GameSyncSphere Platform Statistics',
-      timestamp: new Date().toISOString(),
-      system: {
-        database: databaseReady ? 'PostgreSQL Connected' : 'In-Memory Fallback',
-        version: '5.0.0',
-        uptime: process.uptime()
-      },
-      stats: {
-        ...stats,
-        activeSessions: sessions.size,
-        averageEarningsPerUser: stats.totalUsers > 0 ? (stats.totalEarnings / stats.totalUsers).toFixed(2) : '0.00'
-      },
-      features: [
-        'User Registration & Login',
-        'Claude AI Survey Generation',
-        'Real Money Earnings System',
-        'Experience-Based Bonuses',
-        'Database Integration',
-        'Complete Earnings Tracking'
-      ]
-    });
-
-  } catch (error) {
-    console.error('Platform stats error:', error);
-    res.status(500).json({
-      error: 'Failed to fetch platform statistics',
-      message: 'Unable to load stats'
     });
   }
 });
@@ -666,7 +431,7 @@ async function authenticateUser(req, res, next) {
   }
 }
 
-// Survey routes
+// Generate Claude AI Survey
 app.post('/api/survey/generate', authenticateUser, async (req, res) => {
   try {
     const { 
@@ -810,6 +575,7 @@ Respond with ONLY valid JSON:
   }
 });
 
+// Submit Survey and Earn Money
 app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
   try {
     const { surveyId } = req.params;
@@ -908,4 +674,156 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('
+    console.error('Survey submission error:', error);
+    res.status(500).json({ 
+      error: 'Failed to submit survey',
+      details: error.message 
+    });
+  }
+});
+
+// Get User's Surveys and Earnings
+app.get('/api/user/surveys', authenticateUser, (req, res) => {
+  const completedSurveys = req.user.completed_surveys || req.user.completedSurveys || 0;
+  const totalEarnings = req.user.total_earnings || req.user.totalEarnings || 0;
+  
+  const experienceLevel = completedSurveys < 5 ? 'Beginner' : 
+                          completedSurveys < 15 ? 'Experienced' : 'Expert';
+  
+  res.json({
+    success: true,
+    user: {
+      username: req.user.username,
+      email: req.user.email,
+      memberSince: req.user.created_at ? req.user.created_at.split('T')[0] : 'Today',
+      experienceLevel,
+      storage: databaseReady ? 'Database' : 'Memory'
+    },
+    earnings: {
+      total: totalEarnings.toFixed(2),
+      completedSurveys: completedSurveys,
+      averagePerSurvey: completedSurveys > 0 ? 
+        (totalEarnings / completedSurveys).toFixed(2) : '0.00',
+      currentExperienceBonus: (completedSurveys * 0.5).toFixed(2),
+      nextLevelAt: completedSurveys < 5 ? '5 surveys (Experienced)' :
+                   completedSurveys < 15 ? '15 surveys (Expert)' : 'Maximum level reached!'
+    },
+    activeSurveys: (req.user.activeSurveys || []).map(s => ({
+      id: s.id,
+      estimatedEarnings: s.estimatedEarnings,
+      estimatedTime: s.estimatedCompletionTime,
+      gameContext: s.gameContext,
+      expiresAt: s.expiresAt,
+      experienceBonus: s.experienceBonus
+    })),
+    recentCompletedSurveys: (req.user.completedSurveyHistory || [])
+      .slice(-5)
+      .reverse()
+      .map(s => ({
+        id: s.id,
+        earnings: s.actualEarnings.toFixed(2),
+        completedAt: s.completedAt,
+        gameContext: s.gameContext,
+        questionsAnswered: s.responses.length
+      })),
+    revolutionaryFeatures: [
+      'Claude AI generates surveys based on your gaming behavior',
+      'Earn more money as you complete more surveys',
+      'Experience-based bonus system',
+      'Full transparency on earnings and data usage',
+      databaseReady ? 'Permanent database storage' : 'Will migrate to permanent storage'
+    ]
+  });
+});
+
+// Platform Stats
+app.get('/api/platform/stats', async (req, res) => {
+  try {
+    let stats = { totalUsers: 0, totalEarnings: 0, totalSurveys: 0, totalCompanies: 0 };
+
+    if (databaseReady && prisma) {
+      try {
+        const [userCount, userAggregates, companyCount] = await Promise.all([
+          prisma.user.count(),
+          prisma.user.aggregate({
+            _sum: { total_earnings: true, completed_surveys: true }
+          }),
+          prisma.company.count()
+        ]);
+
+        stats = {
+          totalUsers: userCount,
+          totalEarnings: userAggregates._sum.total_earnings || 0,
+          totalSurveys: userAggregates._sum.completed_surveys || 0,
+          totalCompanies: companyCount
+        };
+      } catch (dbError) {
+        console.error('Database stats error:', dbError);
+      }
+    } else {
+      stats.totalUsers = users.size;
+      stats.totalEarnings = Array.from(users.values()).reduce((sum, user) => sum + (user.totalEarnings || 0), 0);
+      stats.totalSurveys = Array.from(users.values()).reduce((sum, user) => sum + (user.completedSurveys || 0), 0);
+    }
+    
+    res.json({
+      success: true,
+      message: 'GameSyncSphere Platform Statistics',
+      timestamp: new Date().toISOString(),
+      system: {
+        database: databaseReady ? 'PostgreSQL Connected' : 'In-Memory Fallback',
+        version: '5.0.0',
+        uptime: process.uptime()
+      },
+      stats: {
+        ...stats,
+        activeSessions: sessions.size,
+        averageEarningsPerUser: stats.totalUsers > 0 ? (stats.totalEarnings / stats.totalUsers).toFixed(2) : '0.00'
+      },
+      features: [
+        'User Registration & Login',
+        'Claude AI Survey Generation',
+        'Real Money Earnings System',
+        'Experience-Based Bonuses',
+        'Database Integration',
+        'Complete Earnings Tracking'
+      ]
+    });
+
+  } catch (error) {
+    console.error('Platform stats error:', error);
+    res.status(500).json({
+      error: 'Failed to fetch platform statistics',
+      message: 'Unable to load stats'
+    });
+  }
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({
+    message: 'GameSyncSphere with Database Integration - Ready!',
+    authentication: '✅ Working',
+    crypto: '✅ Built-in Node.js',
+    database: databaseReady ? '✅ PostgreSQL Connected' : '⚠️ Fallback Mode',
+    claudeAI: process.env.ANTHROPIC_API_KEY ? '✅ Connected' : '❌ Not configured',
+    userStorage: databaseReady ? '✅ Database Ready' : '📝 In-memory with migration ready',
+    sessionManagement: '✅ Active',
+    surveySystem: '✅ Claude AI Ready',
+    earningsTracking: '✅ Real Money System',
+    persistence: databaseReady ? '✅ Permanent Storage' : '⚠️ Temporary (can migrate)',
+    ready: '✅ Ready for users to earn money with permanent accounts!'
+  });
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 GameSyncSphere with Database Integration running on port ${PORT}`);
+  console.log(`🔐 Authentication: Secure Token-Based`);
+  console.log(`🗄️ Database: ${databaseReady ? 'PostgreSQL Connected' : 'In-Memory with Migration Ready'}`);
+  console.log(`🤖 Claude AI: ${process.env.ANTHROPIC_API_KEY ? 'ENABLED' : 'DISABLED'}`);
+  console.log(`💰 Earnings System: Active with Experience Bonuses`);
+  console.log(`📊 Data Storage: ${databaseReady ? 'Permanent' : 'Temporary (migration available)'}`);
+  console.log(`🌍 Live at: https://gamesyncsphere-production.up.railway.app/`);
+  console.log(`🎯 Ready for users to register, login, and start earning money with permanent accounts!`);
+});
