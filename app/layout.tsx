@@ -7,23 +7,23 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "GameSyncSphere - World's First AIaaS for Gaming Data Analytics",
+  title: "GameSyncSphere - Revolutionary AI Gaming Analytics",
   description:
-    "Pioneer the future of gaming analytics with AI-powered surveys, player compensation, and B2B marketplace. Powered by Claude AI and PostgreSQL.",
-  keywords: "gaming analytics, AI surveys, player compensation, gaming data, Claude AI, PostgreSQL, B2B marketplace",
+    "The world's first player-compensated gaming analytics platform powered by Claude AI. Earn money from gaming surveys, connect with players, and access revolutionary insights.",
+  keywords: "gaming, analytics, AI, Claude, surveys, earnings, esports, gaming platform",
   authors: [{ name: "GameSyncSphere Team" }],
   openGraph: {
-    title: "GameSyncSphere - Revolutionary Gaming Analytics Platform",
-    description:
-      "The world's first AIaaS for gaming data analytics with direct player compensation and AI-powered insights.",
+    title: "GameSyncSphere - Revolutionary AI Gaming Analytics",
+    description: "Earn money from Claude AI gaming surveys. Join 150K+ players earning real money.",
     type: "website",
-    url: "https://gamesyncsphere-analytics.vercel.app",
+    url: "https://gamesyncsphere-production.up.railway.app",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GameSyncSphere - Gaming Analytics Revolution",
-    description: "Earn money from AI-powered gaming surveys. Join the revolution in gaming data analytics.",
+    title: "GameSyncSphere - Revolutionary AI Gaming Analytics",
+    description: "Earn money from Claude AI gaming surveys. Join 150K+ players earning real money.",
   },
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({

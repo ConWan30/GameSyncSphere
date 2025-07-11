@@ -52,7 +52,6 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        charcoal: "#1a1a1a",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -68,27 +67,35 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        holographic: {
+        "holographic-pulse": {
           "0%, 100%": {
-            "background-position": "0% 50%",
-            "box-shadow": "0 0 20px rgba(59, 130, 246, 0.5)",
+            opacity: "0.5",
+            transform: "scale(1)",
           },
           "50%": {
-            "background-position": "100% 50%",
-            "box-shadow": "0 0 30px rgba(147, 51, 234, 0.5)",
+            opacity: "1",
+            transform: "scale(1.05)",
+          },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-20px)" },
+        },
+        glow: {
+          "0%, 100%": {
+            boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)",
+          },
+          "50%": {
+            boxShadow: "0 0 40px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.3)",
           },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        holographic: "holographic 3s ease-in-out infinite",
-      },
-      backgroundImage: {
-        holographic: "linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)",
-      },
-      backgroundSize: {
-        "400%": "400% 400%",
+        "holographic-pulse": "holographic-pulse 2s ease-in-out infinite",
+        float: "float 3s ease-in-out infinite",
+        glow: "glow 2s ease-in-out infinite alternate",
       },
     },
   },
