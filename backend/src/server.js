@@ -1633,6 +1633,19 @@ app.use("/api/*", (req, res) => {
 })
 
 const PORT = process.env.PORT || 3001
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 GameSyncSphere with Next.js Landing Page Integration running on port ${PORT}`);
-  console.log(`🌐 Landing Page: Next.js integration ready`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 GameSyncSphere with Next.js Landing Page Integration running on port ${PORT}`)
+  console.log(`🌐 Landing Page: Next.js integration ready`)
+  console.log(`🔐 Player Authentication: Secure Token-Based`)
+  console.log(`🏢 Company Authentication: Secure Token-Based`)
+  console.log(`🗄️ Database: ${databaseReady ? "PostgreSQL Connected" : "In-Memory with Migration Ready"}`)
+  console.log(`🤖 Claude AI: ${process.env.ANTHROPIC_API_KEY ? "ENABLED" : "DISABLED"}`)
+  console.log(`💰 Earnings System: Active with Experience Bonuses`)
+  console.log(`💼 B2B Marketplace: Survey Request System Active`)
+  console.log(`📧 Newsletter System: Active`)
+  console.log(`📞 Contact System: Active`)
+  console.log(`🔒 Security: Enhanced CORS and headers configured`)
+  console.log(`📊 Data Storage: ${databaseReady ? "Permanent" : "Temporary (migration available)"}`)
+  console.log(`🌍 Live at: https://gamesyncsphere-production.up.railway.app/`)
+  console.log(`🎯 Ready for Next.js landing page integration with full API support!`)
+})
