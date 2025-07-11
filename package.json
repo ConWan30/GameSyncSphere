@@ -2,9 +2,11 @@
   "name": "gamesyncsphere",
   "version": "1.0.0",
   "description": "Revolutionary Gaming Analytics & AI-Powered Data Monetization Platform",
-  "main": "backend/src/server.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node backend/src/server.js"
+    "start": "node server.js",
+    "build": "prisma generate && prisma db push --accept-data-loss",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -13,7 +15,10 @@
     "compression": "^1.7.4",
     "express-rate-limit": "^6.7.0",
     "socket.io": "^4.7.1",
-    "dotenv": "^1.0.0",
-    "axios": "^1.4.0"
+    "dotenv": "^16.0.0",
+    "axios": "^1.4.0",
+    "prisma": "^5.0.0",
+    "@prisma/client": "^5.0.0",
+    "pg": "^8.11.0"
   }
 }
