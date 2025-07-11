@@ -18,7 +18,7 @@ const sessions = new Map();
 let prisma = null;
 let databaseReady = false;
 
-// Initialize Prisma connection
+// Enhanced database initialization with schema deployment
 async function initializeDatabase() {
   try {
     const { PrismaClient } = require('@prisma/client');
@@ -26,13 +26,48 @@ async function initializeDatabase() {
       log: ['error', 'warn']
     });
     
+    console.log('🔗 Connecting to PostgreSQL...');
     await prisma.$connect();
     console.log('✅ Database connected successfully!');
     
-    const userCount = await prisma.user.count();
-    console.log(`📊 Current users in database: ${userCount}`);
+    // Check if schema exists by testing a simple query
+    try {
+      const userCount = await prisma.user.count();
+      console.log(`📊 Schema verified - Current users in database: ${userCount}`);
+      return true;
+      
+    } catch (schemaError) {
+      if (schemaError.code === 'P2021' || schemaError.message.includes('does not exist')) {
+        console.log('📋 Database schema missing - deploying now...');
+        
+        try {
+          // Deploy schema using Prisma CLI
+          const { execSync } = require('child_process');
+          
+          console.log('🔧 Generating Prisma client...');
+          execSync('npx prisma generate', { stdio: 'inherit' });
+          
+          console.log('🚀 Deploying database schema...');
+          execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+          
+          // Verify deployment worked
+          const userCount = await prisma.user.count();
+          console.log('✅ Schema deployed successfully!');
+          console.log(`📊 Database ready - Users: ${userCount}`);
+          
+          return true;
+          
+        } catch (deployError) {
+          console.error('❌ Schema deployment failed:', deployError.message);
+          console.log('💡 Fallback: Manual deployment required');
+          return false;
+        }
+      } else {
+        console.error('❌ Database query error:', schemaError.message);
+        return false;
+      }
+    }
     
-    return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
     console.log('📝 Will use in-memory storage as fallback');
@@ -125,7 +160,7 @@ app.get('/api/database/init', async (req, res) => {
       }
       databaseReady = true;
     }
-
+    
     const userCount = await prisma.user.count();
     const companyCount = await prisma.company.count();
     
@@ -160,38 +195,38 @@ app.get('/api/database/init', async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, username, password, fullName } = req.body;
-
+    
     if (!email || !username || !password) {
       return res.status(400).json({
         error: 'Missing required fields',
         message: 'Email, username, and password are required'
       });
     }
-
+    
     if (password.length < 8) {
       return res.status(400).json({
         error: 'Password too short',
         message: 'Password must be at least 8 characters'
       });
     }
-
+    
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const hashedPassword = hashPassword(password);
     let user;
-
+    
     if (databaseReady && prisma) {
       try {
         const existingUser = await prisma.user.findFirst({
           where: { OR: [{ email: email }, { username: username }] }
         });
-
+        
         if (existingUser) {
           return res.status(409).json({
             error: 'User already exists',
             message: existingUser.email === email ? 'Email already registered' : 'Username already taken'
           });
         }
-
+        
         user = await prisma.user.create({
           data: {
             email,
@@ -199,9 +234,7 @@ app.post('/api/auth/register', async (req, res) => {
             password_hash: hashedPassword,
             full_name: fullName || username,
             total_earnings: 0,
-            completed_surveys: 0,
-            gaming_platforms: [],
-            favorite_games: []
+            completed_surveys: 0
           },
           select: {
             id: true,
@@ -213,14 +246,13 @@ app.post('/api/auth/register', async (req, res) => {
             created_at: true
           }
         });
-
         console.log(`✅ User registered in database: ${username}`);
       } catch (dbError) {
         console.error('Database registration failed:', dbError);
         databaseReady = false;
       }
     }
-
+    
     if (!databaseReady || !user) {
       if (users.has(email)) {
         return res.status(409).json({
@@ -228,7 +260,7 @@ app.post('/api/auth/register', async (req, res) => {
           message: 'This email is already registered'
         });
       }
-
+      
       user = {
         id: userId,
         email,
@@ -243,11 +275,10 @@ app.post('/api/auth/register', async (req, res) => {
         activeSurveys: [],
         completedSurveyHistory: []
       };
-
       users.set(email, user);
       console.log(`📝 User registered in memory: ${username}`);
     }
-
+    
     const token = generateToken();
     sessions.set(token, {
       userId: user.id,
@@ -255,7 +286,7 @@ app.post('/api/auth/register', async (req, res) => {
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     });
-
+    
     const userResponse = {
       id: user.id,
       email: user.email,
@@ -279,7 +310,6 @@ app.post('/api/auth/register', async (req, res) => {
         databaseReady ? 'Permanent account storage' : 'Account will be migrated to permanent storage'
       ]
     });
-
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
@@ -293,16 +323,16 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    
     if (!email || !password) {
       return res.status(400).json({
         error: 'Missing credentials',
         message: 'Email and password are required'
       });
     }
-
+    
     let user = null;
-
+    
     if (databaseReady && prisma) {
       try {
         user = await prisma.user.findUnique({
@@ -321,7 +351,7 @@ app.post('/api/auth/login', async (req, res) => {
             is_active: true
           }
         });
-
+        
         if (user && user.password_hash === hashPassword(password)) {
           await prisma.user.update({
             where: { id: user.id },
@@ -334,7 +364,7 @@ app.post('/api/auth/login', async (req, res) => {
         user = null;
       }
     }
-
+    
     if (!user) {
       user = users.get(email);
       if (user && user.password === hashPassword(password)) {
@@ -343,14 +373,14 @@ app.post('/api/auth/login', async (req, res) => {
         console.log(`📝 Memory login: ${user.username}`);
       }
     }
-
+    
     if (!user || (user.password_hash !== hashPassword(password) && user.password !== hashPassword(password))) {
       return res.status(401).json({
         error: 'Invalid credentials',
         message: 'Email or password is incorrect'
       });
     }
-
+    
     const token = generateToken();
     sessions.set(token, {
       userId: user.id,
@@ -358,7 +388,7 @@ app.post('/api/auth/login', async (req, res) => {
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     });
-
+    
     const userResponse = {
       id: user.id,
       email: user.email,
@@ -367,7 +397,7 @@ app.post('/api/auth/login', async (req, res) => {
       total_earnings: user.total_earnings || 0,
       completed_surveys: user.completed_surveys || 0
     };
-
+    
     res.json({
       success: true,
       message: `🎮 Welcome back, ${user.username}!`,
@@ -381,7 +411,6 @@ app.post('/api/auth/login', async (req, res) => {
         memberSince: user.created_at ? user.created_at.split('T')[0] : 'Today'
       }
     });
-
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
@@ -402,7 +431,7 @@ async function authenticateUser(req, res, next) {
         message: 'Please login to access surveys'
       });
     }
-
+    
     const session = sessions.get(token);
     if (!session || new Date() > new Date(session.expiresAt)) {
       return res.status(401).json({
@@ -410,19 +439,18 @@ async function authenticateUser(req, res, next) {
         message: 'Please login again'
       });
     }
-
+    
     let user = null;
-
     if (databaseReady && prisma) {
       user = await prisma.user.findUnique({ where: { id: session.userId } });
     } else {
       user = Array.from(users.values()).find(u => u.id === session.userId);
     }
-
+    
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
+    
     req.user = user;
     req.token = token;
     next();
@@ -440,18 +468,18 @@ app.post('/api/survey/generate', authenticateUser, async (req, res) => {
       targetInsights = ['equipment_satisfaction', 'game_enjoyment'],
       maxQuestions = 4
     } = req.body;
-
+    
     if (!process.env.ANTHROPIC_API_KEY) {
       return res.status(500).json({ 
         error: 'Claude AI not configured',
         message: 'Survey generation temporarily unavailable'
       });
     }
-
+    
     const completedSurveys = req.user.completed_surveys || req.user.completedSurveys || 0;
     const experienceBonus = completedSurveys * 0.5;
     const baseEarning = 15.50;
-
+    
     const claudePrompt = `You are an expert gaming survey designer creating personalized surveys for GameSyncSphere.
 
 PLAYER CONTEXT:
@@ -495,7 +523,7 @@ Respond with ONLY valid JSON:
         'anthropic-version': '2023-06-01'
       }
     });
-
+    
     let aiSurveyData;
     try {
       const claudeText = claudeResponse.data.content[0].text.trim()
@@ -524,7 +552,7 @@ Respond with ONLY valid JSON:
         experienceBonus: experienceBonus
       };
     }
-
+    
     const surveyId = `survey_${req.user.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const survey = {
       id: surveyId,
@@ -538,14 +566,14 @@ Respond with ONLY valid JSON:
       estimatedEarnings: aiSurveyData.totalEarnings,
       experienceBonus: aiSurveyData.experienceBonus || experienceBonus
     };
-
+    
     if (!req.user.activeSurveys) req.user.activeSurveys = [];
     req.user.activeSurveys.push(survey);
     
     if (!databaseReady) {
       users.set(req.user.email, req.user);
     }
-
+    
     res.json({
       success: true,
       surveyId,
@@ -565,7 +593,6 @@ Respond with ONLY valid JSON:
       },
       revolutionaryFeature: `Personalized Claude AI survey - Experience bonus: +$${experienceBonus.toFixed(2)} per question!`
     });
-
   } catch (error) {
     console.error('Survey generation error:', error);
     res.status(500).json({ 
@@ -580,7 +607,7 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
   try {
     const { surveyId } = req.params;
     const { responses } = req.body;
-
+    
     const surveyIndex = req.user.activeSurveys?.findIndex(s => s.id === surveyId);
     if (surveyIndex === -1 || !req.user.activeSurveys) {
       return res.status(404).json({ 
@@ -588,7 +615,7 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
         message: 'This survey does not exist or has expired'
       });
     }
-
+    
     const survey = req.user.activeSurveys[surveyIndex];
     
     if (survey.status === 'completed') {
@@ -596,10 +623,10 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
         error: 'Survey already completed'
       });
     }
-
+    
     let totalEarnings = 0;
     const processedResponses = [];
-
+    
     survey.questions.forEach((question) => {
       const response = responses[question.id];
       if (response !== undefined) {
@@ -613,15 +640,15 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
         });
       }
     });
-
+    
     const newTotalEarnings = (req.user.total_earnings || req.user.totalEarnings || 0) + totalEarnings;
     const newCompletedSurveys = (req.user.completed_surveys || req.user.completedSurveys || 0) + 1;
-
+    
     survey.status = 'completed';
     survey.completedAt = new Date().toISOString();
     survey.responses = processedResponses;
     survey.actualEarnings = totalEarnings;
-
+    
     if (databaseReady && prisma) {
       try {
         await prisma.user.update({
@@ -631,7 +658,6 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
             completed_surveys: newCompletedSurveys
           }
         });
-
         req.user.total_earnings = newTotalEarnings;
         req.user.completed_surveys = newCompletedSurveys;
         
@@ -644,14 +670,14 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
       req.user.completedSurveys = newCompletedSurveys;
       users.set(req.user.email, req.user);
     }
-
+    
     if (!req.user.completedSurveyHistory) req.user.completedSurveyHistory = [];
     req.user.completedSurveyHistory.push(survey);
     req.user.activeSurveys.splice(surveyIndex, 1);
-
+    
     const newExperienceLevel = newCompletedSurveys < 5 ? 'Beginner' : 
                                newCompletedSurveys < 15 ? 'Experienced' : 'Expert';
-
+    
     res.json({
       success: true,
       message: `🎉 Survey completed! You earned $${totalEarnings.toFixed(2)}!`,
@@ -672,7 +698,6 @@ app.post('/api/survey/:surveyId/submit', authenticateUser, async (req, res) => {
       levelUp: newCompletedSurveys === 5 ? '🎉 Level Up! You are now "Experienced"!' :
                newCompletedSurveys === 15 ? '🚀 Level Up! You are now "Expert"!' : null
     });
-
   } catch (error) {
     console.error('Survey submission error:', error);
     res.status(500).json({ 
@@ -736,21 +761,24 @@ app.get('/api/user/surveys', authenticateUser, (req, res) => {
   });
 });
 
-// Platform Stats
+// Platform Stats - FIXED VERSION
 app.get('/api/platform/stats', async (req, res) => {
   try {
     let stats = { totalUsers: 0, totalEarnings: 0, totalSurveys: 0, totalCompanies: 0 };
-
+    
     if (databaseReady && prisma) {
       try {
         const [userCount, userAggregates, companyCount] = await Promise.all([
           prisma.user.count(),
           prisma.user.aggregate({
-            _sum: { total_earnings: true, completed_surveys: true }
+            _sum: { 
+              total_earnings: true, 
+              completed_surveys: true 
+            }
           }),
           prisma.company.count()
         ]);
-
+        
         stats = {
           totalUsers: userCount,
           totalEarnings: userAggregates._sum.total_earnings || 0,
@@ -789,7 +817,6 @@ app.get('/api/platform/stats', async (req, res) => {
         'Complete Earnings Tracking'
       ]
     });
-
   } catch (error) {
     console.error('Platform stats error:', error);
     res.status(500).json({
