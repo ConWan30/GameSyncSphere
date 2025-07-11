@@ -454,7 +454,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Company Registration
+// Company Registration - FIXED VERSION
 app.post('/api/companies/register', async (req, res) => {
   try {
     const {
@@ -510,23 +510,17 @@ app.post('/api/companies/register', async (req, res) => {
         console.log(`✅ Company registered in database: ${companyName}`);
       } catch (dbError) {
         console.error('Database company registration failed:', dbError);
-        databaseReady = false;
+        company = null;
       }
     }
 
-    if (!databaseReady || !company) {
-      if (companies.has(email)) {
-        return res.status(409).json({
-          error: 'Company already registered',
-          message: 'This email is already associated with a company account'
-        });
-      }
-
+    // ALWAYS create memory backup regardless of database status
+    if (!company) {
       company = {
         id: companyId,
         name: companyName,
         email,
-        password: hashedPassword,
+        password_hash: hashedPassword,
         company_type: companyType,
         website,
         description,
@@ -535,9 +529,12 @@ app.post('/api/companies/register', async (req, res) => {
         current_budget: 0,
         created_at: new Date().toISOString()
       };
-      companies.set(email, company);
-      console.log(`📝 Company registered in memory: ${companyName}`);
     }
+
+    // CRITICAL FIX: Store in memory by both email AND id for lookup
+    companies.set(email, company);
+    companies.set(company.id, company);
+    console.log(`📝 Company stored in memory: ${companyName} (ID: ${company.id})`);
 
     const token = generateToken();
     sessions.set(token, {
@@ -617,12 +614,12 @@ app.post('/api/companies/login', async (req, res) => {
 
     if (!company) {
       company = companies.get(email);
-      if (company && company.password === hashPassword(password)) {
+      if (company && company.password_hash === hashPassword(password)) {
         console.log(`📝 Memory company login: ${company.name}`);
       }
     }
 
-    if (!company || (company.password_hash !== hashPassword(password) && company.password !== hashPassword(password))) {
+    if (!company || (company.password_hash !== hashPassword(password))) {
       return res.status(401).json({
         error: 'Invalid credentials',
         message: 'Email or password is incorrect'
@@ -706,7 +703,7 @@ async function authenticateUser(req, res, next) {
   }
 }
 
-// Authentication middleware for companies
+// Authentication middleware for companies - FIXED VERSION
 async function authenticateCompany(req, res, next) {
   try {
     const token = req.headers.authorization?.replace('Bearer ', '');
@@ -727,21 +724,43 @@ async function authenticateCompany(req, res, next) {
     }
     
     let company = null;
+    
+    // Try database first
     if (databaseReady && prisma) {
-      company = await prisma.company.findUnique({ where: { id: session.companyId } });
-    } else {
-      company = Array.from(companies.values()).find(c => c.id === session.companyId);
+      try {
+        company = await prisma.company.findUnique({ 
+          where: { id: session.companyId }
+        });
+      } catch (dbError) {
+        console.error('Database company lookup failed:', dbError);
+      }
+    }
+    
+    // Fallback to memory storage - SEARCH BY ID
+    if (!company) {
+      company = companies.get(session.companyId);
+      if (!company) {
+        // Also try searching by email as fallback
+        company = Array.from(companies.values()).find(c => c.id === session.companyId);
+      }
     }
     
     if (!company) {
-      return res.status(404).json({ error: 'Company not found' });
+      return res.status(404).json({ 
+        error: 'Company not found',
+        message: 'Company record not found'
+      });
     }
     
     req.company = company;
     req.token = token;
     next();
   } catch (error) {
-    res.status(500).json({ error: 'Company authentication failed' });
+    console.error('Company authentication error:', error);
+    res.status(500).json({ 
+      error: 'Authentication failed',
+      message: error.message 
+    });
   }
 }
 
@@ -874,26 +893,6 @@ app.post('/api/companies/survey-requests', authenticateCompany, async (req, res)
         reward_per_response: rewardPerResponse || 15.50,
         platform_fee: platformFee,
         ai_generation_cost: aiGenerationCost,
-        status: 'active',
-        created_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + (duration || 30) * 24 * 60 * 60 * 1000).toISOString()
-      };
-    }
-
-    res.json({
-      success: true,
-      message: 'Survey request created successfully!',
-      surveyRequest: {
-        id: surveyRequest.id,
-        title: surveyRequest.title,
-        estimatedReach: calculateEstimatedReach(targetAudience || {}),
-        totalCost: totalCost,
-        breakdown: {
-          playerRewards: budget,
-          platformFee,
-          aiGenerationCost,
-          total: totalCost
-        },
         status: 'active',
         expiresAt: surveyRequest.expires_at
       }
@@ -1425,3 +1424,23 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🌍 Live at: https://gamesyncsphere-production.up.railway.app/`);
   console.log(`🎯 Ready for players to earn money and companies to buy gaming insights!`);
 });
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + (duration || 30) * 24 * 60 * 60 * 1000).toISOString()
+      };
+    }
+
+    res.json({
+      success: true,
+      message: 'Survey request created successfully!',
+      surveyRequest: {
+        id: surveyRequest.id,
+        title: surveyRequest.title,
+        estimatedReach: calculateEstimatedReach(targetAudience || {}),
+        totalCost: totalCost,
+        breakdown: {
+          playerRewards: budget,
+          platformFee,
+          aiGenerationCost,
+          total: totalCost
+        },
+        status: 'active',
