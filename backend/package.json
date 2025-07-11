@@ -1,16 +1,14 @@
 {
   "name": "gamesyncsphere-backend",
   "version": "1.0.0",
-  "description": "GameSyncSphere API Backend",
+  "description": "GameSyncSphere API Backend with Database",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest --coverage --passWithNoTests",
     "build": "echo 'Backend build complete'",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "express": "^4.18.2",
