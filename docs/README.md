@@ -21,29 +21,29 @@ GameSyncSphere is a revolutionary gaming analytics and AI-powered data monetizat
 ## API Documentation
 
 ### Health Check
-```
+\`\`\`
 GET /health
-```
+\`\`\`
 Returns the current status of the GameSyncSphere API server.
 
 **Response:**
-```json
+\`\`\`json
 {
   "status": "healthy",
   "timestamp": "2025-07-10T20:30:00Z",
   "version": "1.0.0",
   "message": "GameSyncSphere API is running!"
 }
-```
+\`\`\`
 
 ### API Test Endpoint
-```
+\`\`\`
 GET /api/test
-```
+\`\`\`
 Basic endpoint to verify API connectivity and view available features.
 
 **Response:**
-```json
+\`\`\`json
 {
   "message": "GameSyncSphere API is working!",
   "timestamp": "2025-07-10T20:30:00Z",
@@ -54,19 +54,19 @@ Basic endpoint to verify API connectivity and view available features.
     "Wellness Monitoring"
   ]
 }
-```
+\`\`\`
 
 ### Player Analytics
-```
+\`\`\`
 GET /api/analytics/player/:playerId
-```
+\`\`\`
 Retrieve comprehensive analytics for a specific player.
 
 **Parameters:**
 - `playerId` (string): Unique identifier for the player
 
 **Response:**
-```json
+\`\`\`json
 {
   "playerId": "player123",
   "message": "Analytics endpoint ready",
@@ -77,16 +77,16 @@ Retrieve comprehensive analytics for a specific player.
     "wellnessScore": 7.5
   }
 }
-```
+\`\`\`
 
 ### AI Survey Generation
-```
+\`\`\`
 POST /api/survey/generate
-```
+\`\`\`
 Generate personalized surveys using AI based on player behavior and context.
 
 **Request Body:**
-```json
+\`\`\`json
 {
   "playerId": "player123",
   "gameContext": {
@@ -96,10 +96,10 @@ Generate personalized surveys using AI based on player behavior and context.
   },
   "targetInsights": ["equipment_satisfaction", "wellness_state"]
 }
-```
+\`\`\`
 
 **Response:**
-```json
+\`\`\`json
 {
   "surveyId": "survey_1720648200000",
   "message": "AI survey generation ready",
@@ -113,51 +113,51 @@ Generate personalized surveys using AI based on player behavior and context.
     }
   ]
 }
-```
+\`\`\`
 
 ## Getting Started
 
 ### 1. Installation
-```bash
+\`\`\`bash
 # Clone the repository
 git clone https://github.com/ConWan30/GameSyncSphere.git
 cd GameSyncSphere
 
 # Install all dependencies
 npm run install:all
-```
+\`\`\`
 
 ### 2. Development
-```bash
+\`\`\`bash
 # Start both backend and frontend
 npm run dev
 
 # Or start individually
 npm run dev:backend  # Backend only
 npm run dev:frontend # Frontend only
-```
+\`\`\`
 
 ### 3. Testing
-```bash
+\`\`\`bash
 # Run all tests
 npm test
 
 # Test individual components
 npm run test:backend
 npm run test:frontend
-```
+\`\`\`
 
 ### 4. Building
-```bash
+\`\`\`bash
 # Build for production
 npm run build
-```
+\`\`\`
 
 ### 5. Deployment
-```bash
+\`\`\`bash
 # Deploy to Railway
 npm run deploy
-```
+\`\`\`
 
 ## Technology Stack
 
@@ -184,7 +184,7 @@ npm run deploy
 ## Environment Variables
 
 ### Backend (.env)
-```env
+\`\`\`env
 PORT=3001
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
@@ -197,16 +197,16 @@ CLAUDE_API_KEY=your_claude_api_key
 
 # Security
 JWT_SECRET=your_secure_jwt_secret
-```
+\`\`\`
 
 ### Frontend (.env)
-```env
+\`\`\`env
 REACT_APP_API_URL=http://localhost:3001
-```
+\`\`\`
 
 ## Project Structure
 
-```
+\`\`\`
 GameSyncSphere/
 ├── backend/                 # Node.js API server
 │   ├── src/
@@ -229,7 +229,7 @@ GameSyncSphere/
 │       └── deploy.yml     # CI/CD pipeline
 ├── railway.json           # Railway configuration
 └── package.json          # Root package file
-```
+\`\`\`
 
 ## API Endpoints Reference
 
@@ -246,13 +246,13 @@ GameSyncSphere/
 ## Error Handling
 
 ### Standard Error Response
-```json
+\`\`\`json
 {
   "error": "Error message description",
   "code": "ERROR_CODE",
   "timestamp": "2025-07-10T20:30:00Z"
 }
-```
+\`\`\`
 
 ### HTTP Status Codes
 - `200` - Success
