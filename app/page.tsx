@@ -13,10 +13,14 @@ import {
   Users,
   HeartPulse,
   Store,
-  LayoutDashboard,
   Twitter,
   Github,
   Mail,
+  Trophy,
+  Database,
+  Cpu,
+  Share2,
+  BoxIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,22 +33,25 @@ function Rig() {
   })
 }
 
-// IMPORTANT: 3D Text has been temporarily replaced with a placeholder.
-// To restore it, you must first generate the required font files (`.json`)
-// and place them in the `/public/fonts/` directory.
-// Once you have the fonts, uncomment the original Hero3DText component
-// and the <Hero3DText /> call below.
+// IMPORTANT: 3D Text has been temporarily replaced with a placeholder
+// because the required font files are missing from `/public/fonts/`.
+//
+// TO FIX:
+// 1. Generate `.json` font files from a `.ttf` or `.otf` file.
+//    (Search for 'convert ttf to typeface.json').
+// 2. Place the generated files (e.g., `Geist_Bold.json`) in the `/public/fonts/` directory.
+// 3. Replace the `<Hero3DPlaceholder />` component below with the original `<Hero3DText />` component.
 function Hero3DPlaceholder() {
   return (
-    <Float speed={2} rotationIntensity={1} floatIntensity={1}>
-      <Box args={[3, 3, 0.5]}>
+    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+      <Box args={[4, 1, 1]}>
         <meshStandardMaterial color="#1e3a8a" wireframe />
       </Box>
     </Float>
   )
 }
 
-const FeatureCard = ({ icon: Icon, title, description, index }) => {
+const FeatureCard = ({ icon: Icon, title, description }) => {
   const ref = useRef(null)
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -103,16 +110,22 @@ const AnimatedCounter = ({ value, label }) => {
 export default function LandingPage() {
   const features = [
     {
+      icon: Trophy,
+      title: "Data Bounty Challenges",
+      description:
+        "A legal, skill-based alternative to wagering. Developers post bounties for specific data, and our DePIN-AI fusion ensures fair, verifiable, and transparent monetization of your insights.",
+    },
+    {
       icon: BrainCircuit,
       title: "Earn with Claude AI Surveys",
       description:
-        "Answer personalized surveys crafted by Claude AI, tailored to your gaming habits, and earn up to $15.50+ per survey with experience-based bonuses, uniquely compensating players for insights that shape industry trends.",
+        "Answer personalized surveys crafted by Claude AI, tailored to your gaming habits, and earn up to $15.50+ per survey with experience-based bonuses.",
     },
     {
       icon: ShieldCheck,
-      title: "Fortified Authentication",
+      title: "Fortified Authentication & IoID",
       description:
-        "Securely register and log in with SHA-256 hashed passwords and token-based sessions, safeguarded by our robust PostgreSQL database, ensuring ethical data handling.",
+        "Securely register with SHA-256 hashing and verify your identity for bounty participation with IoTeX's decentralized ID, ensuring a trustworthy data economy.",
     },
     {
       icon: Headset,
@@ -124,13 +137,13 @@ export default function LandingPage() {
       icon: Sparkles,
       title: "AI-Powered Personalization",
       description:
-        "Claude AI tailors surveys and matchmaking to your playstyle, delivering personalized gaming experiences and strategic insights.",
+        "Quicksilver AI agents, powered by Realms knowledge bases, tailor surveys and match you to bounties based on your unique playstyle and hardware.",
     },
     {
       icon: BarChart,
       title: "Transparent Earnings Dashboard",
       description:
-        "Track your earnings, survey completions, and experience bonuses in real-time, securely stored in our scalable PostgreSQL database.",
+        "Track your earnings from surveys and bounties in real-time. All payouts for bounties are managed transparently on the blockchain.",
     },
     {
       icon: Users,
@@ -142,20 +155,23 @@ export default function LandingPage() {
       icon: HeartPulse,
       title: "Wellness-Integrated Sessions",
       description:
-        "Track sessions with FPS, latency, and wellness metrics like break counts, promoting balanced gaming and responsible play in a first-of-its-kind integration.",
+        "Track sessions with FPS, latency, and wellness metrics like break counts, promoting balanced gaming in a first-of-its-kind integration.",
     },
     {
       icon: Store,
-      title: "B2B Survey Marketplace",
+      title: "B2B Survey & Bounty Marketplace",
       description:
-        "Companies create targeted survey requests with custom budgets and audience criteria, accessing real-time player insights.",
+        "Companies create targeted survey requests or data bounties with custom budgets, accessing real-time player insights in a bidirectional marketplace.",
     },
-    {
-      icon: LayoutDashboard,
-      title: "Enterprise Dashboards",
-      description:
-        "B2B users access analytics, survey management, and insights reports, enabling data-driven decisions for developers and manufacturers.",
-    },
+  ]
+
+  const techStack = [
+    { name: "Claude AI", icon: Cpu },
+    { name: "IoTeX", icon: Share2 },
+    { name: "PostgreSQL", icon: Database },
+    { name: "Next.js", icon: BoxIcon },
+    { name: "Vercel", icon: BoxIcon },
+    { name: "Railway", icon: BoxIcon },
   ]
 
   return (
@@ -166,6 +182,9 @@ export default function LandingPage() {
           <nav className="hidden md:flex gap-6 items-center">
             <a href="#features" className="hover:text-glowing-blue transition-colors">
               Features
+            </a>
+            <a href="#tech" className="hover:text-glowing-blue transition-colors">
+              Technology
             </a>
             <a href="#stats" className="hover:text-glowing-blue transition-colors">
               Stats
@@ -191,13 +210,13 @@ export default function LandingPage() {
             </Canvas>
           </div>
           <div className="relative z-10 text-center p-4">
-            <h2 className="font-orbitron text-xl md:text-2xl mt-48 text-metallic-silver/80">
+            <h1 className="font-orbitron text-4xl md:text-5xl font-bold text-white">GameSyncSphere</h1>
+            <h2 className="font-orbitron text-xl md:text-2xl mt-4 text-metallic-silver/80">
               Pioneer the Future of Gaming Analytics
             </h2>
             <p className="mt-4 max-w-3xl mx-auto text-metallic-silver/70">
-              As the world's first AIaaS for gaming data analytics, empower players with compensated insights, wellness
-              monitoring, and community tools, while enabling B2B marketplaces for developers and manufacturers in a
-              privacy-first ecosystem.
+              The world's first AIaaS platform fusing DePIN with player-compensated insights. Earn from AI-powered
+              surveys and skill-based Data Bounty Challenges in a transparent, ethical data economy.
             </p>
             <div className="mt-8 flex gap-4 justify-center">
               <Button size="lg" className="cta-primary">
@@ -213,10 +232,55 @@ export default function LandingPage() {
         {/* Features Section */}
         <section id="features" className="py-24 bg-gunmetal-gray/20">
           <div className="container mx-auto px-4">
-            <h2 className="text-4xl font-orbitron font-bold text-center mb-12">Platform Features</h2>
+            <h2 className="text-4xl font-orbitron font-bold text-center mb-12">A New Era of Gaming</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <FeatureCard key={index} {...feature} index={index} />
+                <FeatureCard key={index} {...feature} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section className="py-24">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-4xl font-orbitron font-bold mb-4">The DePIN-AI Fusion</h2>
+            <p className="max-w-3xl mx-auto text-metallic-silver/80 mb-12">
+              Our ecosystem connects players, developers, and AI through a seamless, blockchain-verified flow, turning
+              your gaming hardware into a compensated node in the new data economy.
+            </p>
+            <div className="relative h-[400px] w-full">
+              <Canvas>
+                <ambientLight intensity={0.2} />
+                <pointLight position={[0, 5, 5]} />
+                <Suspense fallback={null}>
+                  <group>
+                    <SchemaNode position={[-3.5, 1, 0]} text="Players" />
+                    <SchemaNode position={[3.5, 1, 0]} text="Companies" />
+                    <SchemaNode position={[0, -2.5, 0]} text="PostgreSQL DB" />
+                    <SchemaNode position={[-2, 3, -1]} text="Claude AI" />
+                    <SchemaNode position={[2, 3, -1]} text="IoTeX" />
+                  </group>
+                </Suspense>
+                <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+              </Canvas>
+            </div>
+            <Button size="lg" className="cta-primary mt-8">
+              Join the Revolution
+            </Button>
+          </div>
+        </section>
+
+        {/* Tech Stack Section */}
+        <section id="tech" className="py-24 bg-gunmetal-gray/20">
+          <div className="container mx-auto px-4">
+            <h2 className="text-4xl font-orbitron font-bold text-center mb-12">Powered by Cutting-Edge Technology</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+              {techStack.map(({ name, icon: Icon }) => (
+                <div key={name} className="flex flex-col items-center gap-2 text-metallic-silver/80">
+                  <Icon className="w-12 h-12" />
+                  <span>{name}</span>
+                </div>
               ))}
             </div>
           </div>
@@ -232,35 +296,6 @@ export default function LandingPage() {
               <AnimatedCounter value={1250000} label="Surveys Completed" />
               <AnimatedCounter value={2500000} label="Total Player Earnings ($)" />
             </div>
-          </div>
-        </section>
-
-        {/* How It Works Section */}
-        <section className="py-24 bg-gunmetal-gray/20">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-4xl font-orbitron font-bold mb-4">Experience the Power of Claude AI and PostgreSQL</h2>
-            <p className="max-w-3xl mx-auto text-metallic-silver/80 mb-12">
-              A streamlined overview of our platform’s core functionality, including B2B flows and research-supported
-              innovation.
-            </p>
-            <div className="relative h-[400px] w-full">
-              <Canvas>
-                <ambientLight intensity={0.2} />
-                <pointLight position={[0, 5, 5]} />
-                <Suspense fallback={null}>
-                  <group>
-                    <SchemaNode position={[-3, 1, 0]} text="Players" />
-                    <SchemaNode position={[3, 1, 0]} text="Companies" />
-                    <SchemaNode position={[0, -2, 0]} text="PostgreSQL DB" />
-                    <SchemaNode position={[0, 3, -1]} text="Claude AI" />
-                  </group>
-                </Suspense>
-                <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
-              </Canvas>
-            </div>
-            <Button size="lg" className="cta-primary mt-8">
-              Join the Revolution
-            </Button>
           </div>
         </section>
       </main>
@@ -280,7 +315,7 @@ export default function LandingPage() {
             </a>
           </div>
           <p className="text-sm text-metallic-silver/60">
-            Powered by Claude AI and PostgreSQL. &copy; 2025 GameSyncSphere. All rights reserved.
+            Powered by Claude AI, IoTeX, and PostgreSQL. &copy; 2025 GameSyncSphere. All rights reserved.
           </p>
         </div>
       </footer>
