@@ -1,91 +1,31 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Activity,
-  Database,
-  Users,
-  Building,
-  Mail,
-  TrendingUp,
-  CheckCircle,
-  XCircle,
-  Clock,
-  ArrowLeft,
-  Gamepad2,
-} from "lucide-react"
+import { Gamepad2, TrendingUp, Users, DollarSign, Brain, Star, ArrowLeft, Play, Clock, Award } from "lucide-react"
 import Link from "next/link"
 
-interface SystemStatus {
-  status: string
-  message: string
-  timestamp: string
-  version: string
-  uptime: number
-  database: string
-  users: number
-  companies: number
-  sessions: number
-  newsletters: number
-}
-
-export default function Dashboard() {
-  const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+export default function DashboardPage() {
+  const [userStats, setUserStats] = useState({
+    totalEarnings: 0,
+    surveysCompleted: 0,
+    currentLevel: 1,
+    nextLevelProgress: 0,
+    availableSurveys: 0,
+  })
 
   useEffect(() => {
-    const fetchSystemStatus = async () => {
-      try {
-        const response = await fetch("/health")
-        if (response.ok) {
-          const data = await response.json()
-          setSystemStatus(data)
-        }
-      } catch (error) {
-        console.error("Failed to fetch system status:", error)
-      } finally {
-        setIsLoading(false)
-        setLastUpdated(new Date())
-      }
-    }
-
-    fetchSystemStatus()
-    const interval = setInterval(fetchSystemStatus, 30000) // Update every 30 seconds
-
-    return () => clearInterval(interval)
+    // Simulate fetching user stats
+    setUserStats({
+      totalEarnings: 127.5,
+      surveysCompleted: 23,
+      currentLevel: 3,
+      nextLevelProgress: 65,
+      availableSurveys: 8,
+    })
   }, [])
-
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "healthy":
-      case "connected":
-      case "enabled":
-        return <CheckCircle className="h-5 w-5 text-green-400" />
-      case "fallback":
-      case "disabled":
-        return <XCircle className="h-5 w-5 text-red-400" />
-      default:
-        return <Clock className="h-5 w-5 text-yellow-400" />
-    }
-  }
-
-  const formatUptime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    return `${hours}h ${minutes}m`
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="loading-spinner" />
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -94,219 +34,203 @@ export default function Dashboard() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors">
-                <ArrowLeft className="h-5 w-5" />
-                <span>Back to Home</span>
+              <Link href="/" className="flex items-center text-white/80 hover:text-white">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Home
               </Link>
               <div className="flex items-center space-x-2">
-                <Gamepad2 className="h-8 w-8 text-blue-400" />
-                <span className="text-2xl font-bold holographic-text">GameSyncSphere Dashboard</span>
+                <Gamepad2 className="h-6 w-6 text-blue-400" />
+                <span className="text-xl font-bold holographic-text">GameSyncSphere Dashboard</span>
               </div>
             </div>
-            <Badge variant="outline" className="border-green-500/30 text-green-400">
-              {systemStatus?.status || "Unknown"}
-            </Badge>
+            <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Level {userStats.currentLevel}</Badge>
           </div>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {/* System Overview */}
+        {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">System Dashboard</h1>
-          <p className="text-white/70">Real-time monitoring of GameSyncSphere platform status and analytics</p>
-          <p className="text-sm text-white/50 mt-2">Last updated: {lastUpdated.toLocaleTimeString()}</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Welcome back, Gamer!</h1>
+          <p className="text-white/80">Ready to earn from your gaming insights?</p>
         </div>
 
-        {systemStatus && (
-          <>
-            {/* Status Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card className="gaming-card border-white/10">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white/80">System Status</CardTitle>
-                  <Activity className="h-4 w-4 text-blue-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(systemStatus.status)}
-                    <div className="text-2xl font-bold text-white">{systemStatus.status}</div>
-                  </div>
-                  <p className="text-xs text-white/60 mt-1">Uptime: {formatUptime(systemStatus.uptime)}</p>
-                </CardContent>
-              </Card>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="gaming-card border-white/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white/80">Total Earnings</CardTitle>
+              <DollarSign className="h-4 w-4 text-green-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-400">${userStats.totalEarnings}</div>
+              <p className="text-xs text-white/60">+$23.50 this week</p>
+            </CardContent>
+          </Card>
 
-              <Card className="gaming-card border-white/10">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white/80">Database</CardTitle>
-                  <Database className="h-4 w-4 text-purple-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(systemStatus.database)}
-                    <div className="text-2xl font-bold text-white">
-                      {systemStatus.database === "Connected" ? "Online" : "Fallback"}
+          <Card className="gaming-card border-white/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white/80">Surveys Completed</CardTitle>
+              <Brain className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-400">{userStats.surveysCompleted}</div>
+              <p className="text-xs text-white/60">+5 this week</p>
+            </CardContent>
+          </Card>
+
+          <Card className="gaming-card border-white/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white/80">Current Level</CardTitle>
+              <Award className="h-4 w-4 text-purple-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-400">{userStats.currentLevel}</div>
+              <p className="text-xs text-white/60">{userStats.nextLevelProgress}% to next level</p>
+            </CardContent>
+          </Card>
+
+          <Card className="gaming-card border-white/10">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-white/80">Available Surveys</CardTitle>
+              <Clock className="h-4 w-4 text-orange-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-400">{userStats.availableSurveys}</div>
+              <p className="text-xs text-white/60">New surveys daily</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Available Surveys */}
+          <Card className="gaming-card border-white/10">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center">
+                <Brain className="mr-2 h-5 w-5 text-blue-400" />
+                Available Surveys
+              </CardTitle>
+              <CardDescription className="text-white/70">Complete AI-powered surveys and earn money</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                {
+                  title: "FPS Gaming Preferences",
+                  reward: "$12.50",
+                  time: "8 min",
+                  difficulty: "Easy",
+                },
+                {
+                  title: "MMORPG Player Behavior",
+                  reward: "$18.75",
+                  time: "12 min",
+                  difficulty: "Medium",
+                },
+                {
+                  title: "Mobile Gaming Trends",
+                  reward: "$9.25",
+                  time: "6 min",
+                  difficulty: "Easy",
+                },
+              ].map((survey, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                  <div>
+                    <h4 className="text-white font-medium">{survey.title}</h4>
+                    <div className="flex items-center space-x-4 text-sm text-white/60 mt-1">
+                      <span className="flex items-center">
+                        <Clock className="mr-1 h-3 w-3" />
+                        {survey.time}
+                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        {survey.difficulty}
+                      </Badge>
                     </div>
                   </div>
-                  <p className="text-xs text-white/60 mt-1">{systemStatus.database}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="gaming-card border-white/10">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white/80">Active Users</CardTitle>
-                  <Users className="h-4 w-4 text-green-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-white">{systemStatus.users}</div>
-                  <p className="text-xs text-white/60 mt-1">{systemStatus.sessions} active sessions</p>
-                </CardContent>
-              </Card>
-
-              <Card className="gaming-card border-white/10">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-white/80">Companies</CardTitle>
-                  <Building className="h-4 w-4 text-orange-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-white">{systemStatus.companies}</div>
-                  <p className="text-xs text-white/60 mt-1">Registered partners</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Detailed Information */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <Card className="gaming-card border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <TrendingUp className="mr-2 h-5 w-5 text-blue-400" />
-                    System Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Version</span>
-                    <Badge variant="outline" className="border-blue-500/30 text-blue-400">
-                      {systemStatus.version}
-                    </Badge>
+                  <div className="text-right">
+                    <div className="text-green-400 font-bold">{survey.reward}</div>
+                    <Button size="sm" className="mt-2 neon-button">
+                      <Play className="mr-1 h-3 w-3" />
+                      Start
+                    </Button>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Environment</span>
-                    <span className="text-white">Production</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Last Restart</span>
-                    <span className="text-white">{formatUptime(systemStatus.uptime)} ago</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Newsletter Subscribers</span>
-                    <span className="text-white">{systemStatus.newsletters}</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="gaming-card border-white/10">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
-                    Features Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">User Authentication</span>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-green-400" />
-                      <span className="text-green-400">Active</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Company Registration</span>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-green-400" />
-                      <span className="text-green-400">Active</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Newsletter System</span>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-green-400" />
-                      <span className="text-green-400">Active</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-white/70">Claude AI Surveys</span>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-green-400" />
-                      <span className="text-green-400">Ready</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* API Endpoints */}
-            <Card className="gaming-card border-white/10">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <Mail className="mr-2 h-5 w-5 text-purple-400" />
-                  Available API Endpoints
-                </CardTitle>
-                <CardDescription className="text-white/70">Core API endpoints for platform integration</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { method: "GET", endpoint: "/health", description: "System health check" },
-                    { method: "GET", endpoint: "/api/platform/stats", description: "Platform statistics" },
-                    { method: "POST", endpoint: "/api/newsletter/subscribe", description: "Newsletter subscription" },
-                    { method: "POST", endpoint: "/api/contact", description: "Contact form submission" },
-                    { method: "POST", endpoint: "/api/auth/register", description: "User registration" },
-                    { method: "POST", endpoint: "/api/auth/login", description: "User authentication" },
-                    { method: "POST", endpoint: "/api/companies/register", description: "Company registration" },
-                    { method: "POST", endpoint: "/api/survey/generate", description: "Generate AI survey" },
-                  ].map((endpoint, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10"
-                    >
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <Badge
-                            variant="outline"
-                            className={`text-xs ${
-                              endpoint.method === "GET"
-                                ? "border-green-500/30 text-green-400"
-                                : "border-blue-500/30 text-blue-400"
-                            }`}
-                          >
-                            {endpoint.method}
-                          </Badge>
-                          <code className="text-sm text-white font-mono">{endpoint.endpoint}</code>
-                        </div>
-                        <p className="text-xs text-white/60 mt-1">{endpoint.description}</p>
-                      </div>
-                    </div>
-                  ))}
                 </div>
-              </CardContent>
-            </Card>
+              ))}
+            </CardContent>
+          </Card>
 
-            {/* Quick Actions */}
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Button asChild className="neon-button">
-                <Link href="/api/platform/stats">View API Stats</Link>
-              </Button>
-              <Button asChild variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
-                <Link href="/health">Health Check</Link>
-              </Button>
-              <Button asChild variant="outline" className="border-white/30 text-white hover:bg-white/10 bg-transparent">
-                <Link href="/">Back to Landing</Link>
-              </Button>
-            </div>
-          </>
-        )}
+          {/* Recent Activity */}
+          <Card className="gaming-card border-white/10">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center">
+                <TrendingUp className="mr-2 h-5 w-5 text-green-400" />
+                Recent Activity
+              </CardTitle>
+              <CardDescription className="text-white/70">Your latest earnings and achievements</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                {
+                  action: "Completed Survey",
+                  title: "Battle Royale Preferences",
+                  reward: "+$15.50",
+                  time: "2 hours ago",
+                },
+                {
+                  action: "Level Up",
+                  title: "Reached Level 3",
+                  reward: "+Bonus Multiplier",
+                  time: "1 day ago",
+                },
+                {
+                  action: "Completed Survey",
+                  title: "Gaming Hardware Usage",
+                  reward: "+$11.25",
+                  time: "2 days ago",
+                },
+              ].map((activity, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                  <div>
+                    <h4 className="text-white font-medium">{activity.action}</h4>
+                    <p className="text-white/60 text-sm">{activity.title}</p>
+                    <p className="text-white/40 text-xs">{activity.time}</p>
+                  </div>
+                  <div className="text-green-400 font-bold">{activity.reward}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="mt-8">
+          <Card className="gaming-card border-white/10">
+            <CardHeader>
+              <CardTitle className="text-white">Quick Actions</CardTitle>
+              <CardDescription className="text-white/70">Common tasks and features</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Button className="neon-button h-20 flex-col">
+                  <Brain className="h-6 w-6 mb-2" />
+                  Take Survey
+                </Button>
+                <Button variant="outline" className="h-20 flex-col border-white/20 text-white bg-transparent">
+                  <Users className="h-6 w-6 mb-2" />
+                  Community
+                </Button>
+                <Button variant="outline" className="h-20 flex-col border-white/20 text-white bg-transparent">
+                  <Star className="h-6 w-6 mb-2" />
+                  Achievements
+                </Button>
+                <Button variant="outline" className="h-20 flex-col border-white/20 text-white bg-transparent">
+                  <DollarSign className="h-6 w-6 mb-2" />
+                  Withdraw
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

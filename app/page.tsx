@@ -21,7 +21,6 @@ import {
   Mail,
   Play,
 } from "lucide-react"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 interface PlatformStats {
@@ -112,21 +111,36 @@ export default function LandingPage() {
   }
 
   const handleGetStarted = () => {
+    console.log("Get Started clicked - navigating to register")
     router.push("/auth/register")
   }
 
   const handleStartEarning = () => {
+    console.log("Start Earning clicked - navigating to register")
     router.push("/auth/register")
+  }
+
+  const handleDashboard = () => {
+    console.log("Dashboard clicked - navigating to dashboard")
+    router.push("/dashboard")
+  }
+
+  const handleLogin = () => {
+    console.log("Login clicked - navigating to login")
+    router.push("/auth/login")
   }
 
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
+    console.log(`Scrolling to section: ${sectionId}`)
     const element = document.getElementById(sectionId)
     if (element) {
       element.scrollIntoView({
         behavior: "smooth",
         block: "start",
       })
+    } else {
+      console.error(`Element with id ${sectionId} not found`)
     }
   }
 
@@ -169,28 +183,34 @@ export default function LandingPage() {
             <nav className="hidden md:flex items-center space-x-6">
               <button
                 onClick={() => scrollToSection("hero")}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
               >
                 Home
               </button>
               <button
                 onClick={() => scrollToSection("features")}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
               >
                 Features
               </button>
               <button
                 onClick={() => scrollToSection("stats")}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
               >
                 Stats
               </button>
-              <Link href="/dashboard" className="text-white/80 hover:text-white transition-colors">
+              <button
+                onClick={handleDashboard}
+                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+              >
                 Dashboard
-              </Link>
-              <Link href="/auth/login" className="text-white/80 hover:text-white transition-colors">
+              </button>
+              <button
+                onClick={handleLogin}
+                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+              >
                 Login
-              </Link>
+              </button>
               <Button onClick={handleGetStarted} className="neon-button">
                 Get Started
               </Button>
@@ -234,13 +254,11 @@ export default function LandingPage() {
               <Button
                 size="lg"
                 variant="outline"
+                onClick={handleDashboard}
                 className="border-white/30 text-white hover:bg-white/10 bg-transparent"
-                asChild
               >
-                <Link href="/dashboard" className="flex items-center">
-                  View Dashboard
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
+                View Dashboard
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </div>
 
@@ -248,21 +266,21 @@ export default function LandingPage() {
             <div className="flex justify-center space-x-8 text-sm text-white/60">
               <button
                 onClick={() => scrollToSection("stats")}
-                className="hover:text-white transition-colors flex items-center"
+                className="hover:text-white transition-colors flex items-center bg-transparent border-none cursor-pointer"
               >
                 <TrendingUp className="mr-1 h-4 w-4" />
                 View Stats
               </button>
               <button
                 onClick={() => scrollToSection("features")}
-                className="hover:text-white transition-colors flex items-center"
+                className="hover:text-white transition-colors flex items-center bg-transparent border-none cursor-pointer"
               >
                 <Zap className="mr-1 h-4 w-4" />
                 See Features
               </button>
               <button
                 onClick={() => scrollToSection("newsletter")}
-                className="hover:text-white transition-colors flex items-center"
+                className="hover:text-white transition-colors flex items-center bg-transparent border-none cursor-pointer"
               >
                 <Mail className="mr-1 h-4 w-4" />
                 Get Updates
@@ -355,7 +373,7 @@ export default function LandingPage() {
                   "Personalized surveys powered by Claude AI that adapt to your gaming style and preferences.",
                 color: "text-blue-400",
                 bgColor: "bg-blue-500/20",
-                action: () => router.push("/auth/register"),
+                action: handleGetStarted,
               },
               {
                 icon: DollarSign,
@@ -364,7 +382,7 @@ export default function LandingPage() {
                   "Earn up to $15.50+ per survey with experience-based bonuses. Your insights have real value.",
                 color: "text-green-400",
                 bgColor: "bg-green-500/20",
-                action: () => router.push("/auth/register"),
+                action: handleGetStarted,
               },
               {
                 icon: Shield,
@@ -372,7 +390,7 @@ export default function LandingPage() {
                 description: "SHA-256 encryption, token-based sessions, and complete transparency on all earnings.",
                 color: "text-purple-400",
                 bgColor: "bg-purple-500/20",
-                action: () => router.push("/auth/login"),
+                action: handleLogin,
               },
               {
                 icon: Users,
@@ -380,7 +398,10 @@ export default function LandingPage() {
                 description: "Join vibrant gaming communities, participate in tournaments, and share strategies.",
                 color: "text-orange-400",
                 bgColor: "bg-orange-500/20",
-                action: () => router.push("/community"),
+                action: () => {
+                  console.log("Community clicked - navigating to community")
+                  router.push("/community")
+                },
               },
               {
                 icon: TrendingUp,
@@ -388,7 +409,7 @@ export default function LandingPage() {
                 description: "Earn more as you complete surveys. Expert players can earn significant bonuses.",
                 color: "text-pink-400",
                 bgColor: "bg-pink-500/20",
-                action: () => router.push("/auth/register"),
+                action: handleGetStarted,
               },
               {
                 icon: Zap,
@@ -396,7 +417,7 @@ export default function LandingPage() {
                 description: "Track your earnings, survey completions, and gaming insights in real-time.",
                 color: "text-cyan-400",
                 bgColor: "bg-cyan-500/20",
-                action: () => router.push("/dashboard"),
+                action: handleDashboard,
               },
             ].map((feature, index) => (
               <Card
@@ -505,25 +526,34 @@ export default function LandingPage() {
             <div className="flex items-center space-x-6 text-white/60">
               <button
                 onClick={() => scrollToSection("hero")}
-                className="hover:text-white transition-colors cursor-pointer"
+                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
               >
                 Home
               </button>
-              <Link href="/dashboard" className="hover:text-white transition-colors">
+              <button
+                onClick={handleDashboard}
+                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+              >
                 Dashboard
-              </Link>
-              <Link href="/api/platform/stats" className="hover:text-white transition-colors">
+              </button>
+              <a href="/api/platform/stats" className="hover:text-white transition-colors">
                 API
-              </Link>
-              <Link href="/health" className="hover:text-white transition-colors">
+              </a>
+              <a href="/health" className="hover:text-white transition-colors">
                 Status
-              </Link>
-              <Link href="/auth/login" className="hover:text-white transition-colors">
+              </a>
+              <button
+                onClick={handleLogin}
+                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+              >
                 Login
-              </Link>
-              <Link href="/auth/register" className="hover:text-white transition-colors">
+              </button>
+              <button
+                onClick={handleGetStarted}
+                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+              >
                 Register
-              </Link>
+              </button>
             </div>
           </div>
 
