@@ -23,7 +23,6 @@ export default function HomePage() {
 
     try {
       const response = await fetch(
-        // This connects to YOUR Railway URL
         `${process.env.NEXT_PUBLIC_API_URL || "https://gamesyncsphere-production.up.railway.app"}/api/newsletter`,
         {
           method: "POST",

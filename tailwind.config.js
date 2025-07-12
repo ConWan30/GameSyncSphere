@@ -19,7 +19,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)"],
+        sans: ["var(--font-sans)"],
         orbitron: ["var(--font-orbitron)"],
       },
       colors: {
@@ -57,13 +57,13 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         // Custom Palette
-        "primary-dark": "hsl(var(--primary-dark))",
-        "gunmetal-gray": "hsl(var(--gunmetal-gray))",
-        "metallic-silver": "hsl(var(--metallic-silver))",
-        "accent-blue": "hsl(var(--accent-blue))",
-        "neon-green": "hsl(var(--neon-green))",
-        "electric-purple": "hsl(var(--electric-purple))",
-        "cyber-orange": "hsl(var(--cyber-orange))",
+        "primary-dark": "#0a0a0f",
+        "gunmetal-gray": "#1a1a2e",
+        "metallic-silver": "#c0c0c0",
+        "accent-blue": "#0ea5e9",
+        "neon-green": "#00ff88",
+        "electric-purple": "#8b5cf6",
+        "cyber-orange": "#f97316",
       },
       borderRadius: {
         lg: "var(--radius)",
