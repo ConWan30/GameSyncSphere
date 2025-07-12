@@ -397,22 +397,19 @@ app.get("/api/demo/use-cases", (req, res) => {
   })
 })
 
-// Root route
+// Root route - REMOVED THE REDIRECT TO OLD VERCEL URL
 app.get("/", (req, res) => {
   const userAgent = req.get("User-Agent") || ""
   const acceptsHtml = req.get("Accept")?.includes("text/html")
 
-  if (acceptsHtml && !userAgent.includes("curl") && !userAgent.includes("Postman")) {
-    const landingPageUrl = process.env.FRONTEND_URL || "https://gamesyncsphere-analytics.vercel.app"
-    return res.redirect(302, landingPageUrl)
-  }
-
+  // Return JSON API response instead of redirecting
   res.status(200).json({
     message: "🎮 GameSyncSphere API - Railway Deployment Ready!",
     status: "healthy",
     version: "1.0.3",
     timestamp: new Date().toISOString(),
     database: databaseReady ? "PostgreSQL Connected" : "In-Memory Fallback",
+    landingPage: "Deploy the new holographic landing page to see the updated interface",
     endpoints: [
       "GET /health - Health check",
       "GET /api/platform/stats - Platform statistics",
