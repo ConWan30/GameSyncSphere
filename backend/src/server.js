@@ -4,12 +4,10 @@ const crypto = require("crypto")
 const axios = require("axios")
 const path = require("path")
 
-// Load environment variables
 require("dotenv").config()
 
 const app = express()
 
-// Basic middleware
 app.use(
   cors({
     origin: [
@@ -29,7 +27,6 @@ app.use(
 app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true, limit: "10mb" }))
 
-// Security headers
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff")
   res.setHeader("X-Frame-Options", "DENY")
@@ -38,17 +35,14 @@ app.use((req, res, next) => {
   next()
 })
 
-// In-memory storage for fallback
 const users = new Map()
 const companies = new Map()
 const sessions = new Map()
 const newsletters = new Map()
 
-// Database setup
 let prisma = null
 let databaseReady = false
 
-// Initialize database connection
 async function initializeDatabase() {
   try {
     console.log("🔗 Initializing database connection...")
@@ -71,7 +65,6 @@ async function initializeDatabase() {
     await prisma.$connect()
     console.log("✅ Database connected successfully!")
 
-    // Test the connection
     await prisma.$queryRaw`SELECT 1`
     console.log("✅ Database query test passed!")
 
@@ -83,7 +76,6 @@ async function initializeDatabase() {
   }
 }
 
-// Utility functions
 function hashPassword(password) {
   return crypto
     .createHash("sha256")
@@ -95,7 +87,6 @@ function generateToken() {
   return crypto.randomBytes(32).toString("hex")
 }
 
-// Newsletter subscription endpoint
 app.post("/api/newsletter/subscribe", async (req, res) => {
   try {
     const { email, source = "landing_page" } = req.body
@@ -138,7 +129,6 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
   }
 })
 
-// Contact form endpoint
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, company, message, type = "general" } = req.body
@@ -169,7 +159,6 @@ app.post("/api/contact", async (req, res) => {
   }
 })
 
-// Enhanced platform stats for landing page
 app.get("/api/platform/stats", async (req, res) => {
   try {
     const stats = {
@@ -184,7 +173,6 @@ app.get("/api/platform/stats", async (req, res) => {
     if (databaseReady && prisma) {
       try {
         const [userCount, companyCount] = await Promise.all([prisma.user.count(), prisma.company.count()])
-
         stats.totalUsers = userCount
         stats.totalCompanies = companyCount
       } catch (dbError) {
@@ -192,7 +180,6 @@ app.get("/api/platform/stats", async (req, res) => {
       }
     }
 
-    // Add demo numbers for landing page
     const enhancedStats = {
       ...stats,
       totalUsers: Math.max(stats.totalUsers, 150000),
@@ -230,9 +217,6 @@ app.get("/api/platform/stats", async (req, res) => {
   }
 })
 
-// ============= NEW AI SURVEY ENDPOINTS =============
-
-// AI Survey Generation Endpoint
 app.post("/api/survey/generate", async (req, res) => {
   try {
     const { userId, userProfile } = req.body;
@@ -244,7 +228,6 @@ app.post("/api/survey/generate", async (req, res) => {
       });
     }
 
-    // Generate AI-powered survey
     const baseEarnings = 15.50;
     const experienceBonus = Math.min((userProfile?.completedSurveys || 0) * 0.25, 5.00);
     const surveyId = `survey_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -295,7 +278,6 @@ app.post("/api/survey/generate", async (req, res) => {
       tags: ['AI Generated', 'Personalized', userProfile?.favoriteGames?.[0] || 'Gaming']
     };
 
-    // Save to database if available
     if (databaseReady && prisma) {
       try {
         await prisma.survey.create({
@@ -306,7 +288,7 @@ app.post("/api/survey/generate", async (req, res) => {
             game_context: userProfile || {},
             estimated_earnings: aiSurvey.totalEarnings,
             status: 'active',
-            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
           }
         });
         console.log(`✅ Survey saved to database: ${surveyId}`);
@@ -336,7 +318,6 @@ app.post("/api/survey/generate", async (req, res) => {
   }
 });
 
-// Survey Completion Endpoint
 app.post("/api/survey/complete", async (req, res) => {
   try {
     const { surveyId, userId, responses, completionTime } = req.body;
@@ -352,7 +333,6 @@ app.post("/api/survey/complete", async (req, res) => {
     const experienceBonus = 2.50;
     const totalEarnings = baseEarnings + experienceBonus;
 
-    // Update user earnings if database available
     if (databaseReady && prisma) {
       try {
         await prisma.user.update({
@@ -402,7 +382,6 @@ app.post("/api/survey/complete", async (req, res) => {
   }
 });
 
-// Enhanced User Stats Endpoint  
 app.get("/api/user/stats/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
@@ -471,7 +450,6 @@ app.get("/api/user/stats/:userId", async (req, res) => {
   }
 });
 
-// Platform Analytics Endpoint
 app.get("/api/platform/analytics", async (req, res) => {
   try {
     const analytics = {
@@ -524,9 +502,6 @@ app.get("/api/platform/analytics", async (req, res) => {
   }
 });
 
-// ============= END NEW AI SURVEY ENDPOINTS =============
-
-// Root route
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "🎮 GameSyncSphere API - Railway Deployment Ready!",
@@ -552,7 +527,6 @@ app.get("/", (req, res) => {
   })
 })
 
-// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "healthy",
@@ -577,7 +551,6 @@ app.get("/health", (req, res) => {
   })
 })
 
-// User Registration
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { email, username, password, fullName } = req.body
@@ -694,7 +667,6 @@ app.post("/api/auth/register", async (req, res) => {
   }
 })
 
-// User Login
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body
@@ -779,7 +751,6 @@ app.post("/api/auth/login", async (req, res) => {
   }
 })
 
-// Company Registration
 app.post("/api/companies/register", async (req, res) => {
   try {
     const { companyName, email, password, companyType, website, description } = req.body
@@ -856,132 +827,6 @@ app.post("/api/companies/register", async (req, res) => {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     })
 
-    res.json({
-      success: true,
-      message: `🏢 Welcome back, ${company.name}!`,
-      company: {
-        id: company.id,
-        name: company.name,
-        email: company.email,
-        companyType: company.company_type,
-        verified: company.verified,
-        totalSpent: company.total_spent,
-        currentBudget: company.current_budget,
-      },
-      token,
-    })
-  } catch (error) {
-    console.error("Company login error:", error)
-    res.status(500).json({
-      error: "Login failed",
-      message: "Unable to login",
-    })
-  }
-})
-
-// Test endpoint
-app.get("/api/test", (req, res) => {
-  res.json({
-    message: "GameSyncSphere API - Railway Deployment Ready!",
-    status: "healthy",
-    version: "1.0.4",
-    timestamp: new Date().toISOString(),
-    database: databaseReady ? "✅ PostgreSQL Connected" : "⚠️ In-Memory Fallback",
-    newFeatures: [
-      "AI Survey Generation",
-      "Survey Completion Tracking", 
-      "Enhanced User Statistics",
-      "Platform Analytics Dashboard"
-    ],
-    environment: {
-      nodeEnv: process.env.NODE_ENV || "production",
-      port: process.env.PORT || 3001,
-      hasDatabase: !!process.env.DATABASE_URL,
-      hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
-      hasJwtSecret: !!process.env.JWT_SECRET,
-    },
-    endpoints: [
-      "GET /health - Health check",
-      "GET /api/platform/stats - Platform statistics", 
-      "POST /api/survey/generate - AI survey generation",
-      "POST /api/survey/complete - Survey completion",
-      "GET /api/user/stats/:userId - User statistics",
-      "GET /api/platform/analytics - Platform analytics",
-      "POST /api/newsletter/subscribe - Newsletter signup",
-      "POST /api/contact - Contact form",
-      "POST /api/auth/register - User registration",
-      "POST /api/auth/login - User login",
-      "POST /api/companies/register - Company registration",
-      "POST /api/companies/login - Company login",
-    ],
-  })
-})
-
-// Error handling
-app.use((error, req, res, next) => {
-  console.error("Unhandled error:", error)
-  res.status(500).json({
-    error: "Internal server error",
-    message: "Something went wrong. Please try again.",
-    timestamp: new Date().toISOString(),
-  })
-})
-
-// 404 handler
-app.use("*", (req, res) => {
-  res.status(404).json({
-    error: "Endpoint not found",
-    message: `The endpoint ${req.method} ${req.originalUrl} does not exist`,
-    availableEndpoints: [
-      "GET /health - Health check",
-      "GET /api/platform/stats - Platform statistics",
-      "POST /api/survey/generate - AI survey generation",
-      "POST /api/survey/complete - Survey completion", 
-      "GET /api/user/stats/:userId - User statistics",
-      "GET /api/platform/analytics - Platform analytics",
-      "POST /api/newsletter/subscribe - Newsletter signup",
-      "POST /api/contact - Contact form",
-      "POST /api/auth/register - User registration",
-      "POST /api/auth/login - User login",
-      "POST /api/companies/register - Company registration",
-      "POST /api/companies/login - Company login",
-    ],
-  })
-})
-
-// Initialize database and start server
-const PORT = process.env.PORT || 3001
-
-async function startServer() {
-  try {
-    console.log("🚀 Starting GameSyncSphere Backend...")
-
-    // Initialize database
-    databaseReady = await initializeDatabase()
-
-    // Start server
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 GameSyncSphere Backend running on port ${PORT}`)
-      console.log(`🗄️ Database: ${databaseReady ? "PostgreSQL Connected" : "In-Memory Fallback"}`)
-      console.log(`🔐 Authentication: ${process.env.JWT_SECRET ? "Configured" : "Using default"}`)
-      console.log(`🤖 Claude AI: ${process.env.ANTHROPIC_API_KEY ? "ENABLED" : "DISABLED"}`)
-      console.log(`🌍 Environment: ${process.env.NODE_ENV || "production"}`)
-      console.log(`✅ Server ready for connections!`)
-      console.log(`🎮 NEW FEATURES: AI Survey Generation, Enhanced Analytics, User Stats`)
-    })
-  } catch (error) {
-    console.error("❌ Failed to start server:", error)
-    process.exit(1)
-  }
-}
-
-startServer()d,
-      email: company.email,
-      type: "company",
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-    })
-
     res.status(201).json({
       success: true,
       message: "🏢 Company registered successfully!",
@@ -1003,7 +848,6 @@ startServer()d,
   }
 })
 
-// Company Login
 app.post("/api/companies/login", async (req, res) => {
   try {
     const { email, password } = req.body
@@ -1048,5 +892,21 @@ app.post("/api/companies/login", async (req, res) => {
 
     const token = generateToken()
     sessions.set(token, {
-      companyId: company.i
-    
+      companyId: company.id,
+      email: company.email,
+      type: "company",
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    })
+
+    res.json({
+      success: true,
+      message: `🏢 Welcome back, ${company.name}!`,
+      company: {
+        id: company.id,
+        name: company.name,
+        email: company.email,
+        companyType: company.company_type,
+        verified: company.verified,
+        totalSpent: company.total_spent,
+        current
