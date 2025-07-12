@@ -1,12 +1,15 @@
 {
   "name": "gamesyncsphere-backend",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "GameSyncSphere API Backend",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "build": "npm ci --production",
-    "postinstall": "prisma generate"
+    "build": "npm ci --only=production && npx prisma generate",
+    "postinstall": "npx prisma generate",
+    "dev": "nodemon src/server.js",
+    "db:push": "npx prisma db push",
+    "db:migrate": "npx prisma migrate deploy"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -23,13 +26,13 @@
     "dotenv": "^16.0.0",
     "prisma": "^5.0.0",
     "@prisma/client": "^5.0.0",
-    "pg": "^8.11.0",
-    "crypto": "^1.0.1"
+    "pg": "^8.11.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
