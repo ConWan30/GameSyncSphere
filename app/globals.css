@@ -270,12 +270,12 @@
 
 /* Buttons */
 .holo-button-primary {
-  background-image: linear-gradient(to right, theme("colors.accent-blue"), theme("colors.electric-purple"));
+  background-color: theme("colors.glowing-blue");
   @apply text-white font-semibold border rounded-lg transition-all duration-300 relative overflow-hidden;
-  border-color: theme("colors.accent-blue / 30%");
+  border-color: theme("colors.glowing-blue / 30%");
 }
 .holo-button-primary:hover {
-  box-shadow: 0 10px 15px -3px theme("colors.accent-blue / 25%"), 0 4px 6px -4px theme("colors.accent-blue / 25%");
+  box-shadow: 0 10px 15px -3px theme("colors.glowing-blue / 25%"), 0 4px 6px -4px theme("colors.glowing-blue / 25%");
 }
 
 .holo-button-primary::before {
@@ -295,13 +295,13 @@
 
 .holo-button-secondary {
   @apply border-2 transition-all duration-300;
-  color: theme("colors.accent-blue");
-  border-color: theme("colors.accent-blue");
+  color: theme("colors.glowing-blue");
+  border-color: theme("colors.glowing-blue");
 }
 
 .holo-button-secondary:hover {
   @apply text-white;
-  background-color: theme("colors.accent-blue");
+  background-color: theme("colors.glowing-blue");
 }
 
 /* Cards */
@@ -310,8 +310,8 @@
 }
 
 .holo-card:hover {
-  border-color: theme("colors.accent-blue / 40%");
-  box-shadow: theme("boxShadow.lg"), 0 0 10px 0 theme("colors.accent-blue / 10%");
+  border-color: theme("colors.glowing-blue / 40%");
+  box-shadow: theme("boxShadow.lg"), 0 0 10px 0 theme("colors.glowing-blue / 10%");
 }
 
 .holo-card::before {
@@ -321,7 +321,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(30, 58, 138, 0.5), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -333,9 +333,9 @@
 /* Badges */
 .holo-badge {
   @apply px-4 py-2 rounded-full text-sm font-medium;
-  background-color: theme("colors.accent-blue / 20%");
-  color: theme("colors.accent-blue");
-  border: 1px solid theme("colors.accent-blue / 30%");
+  background-color: theme("colors.glowing-blue / 20%");
+  color: theme("colors.glowing-blue");
+  border: 1px solid theme("colors.glowing-blue / 30%");
 }
 
 /* Input */
@@ -345,8 +345,8 @@
 
 .holo-input:focus {
   @apply ring-1;
-  border-color: theme("colors.accent-blue");
-  --tw-ring-color: theme("colors.accent-blue");
+  border-color: theme("colors.glowing-blue");
+  --tw-ring-color: theme("colors.glowing-blue");
 }
 
 /* Interactive Schema */
@@ -360,12 +360,12 @@
 
 .schema-node {
   @apply absolute flex flex-col items-center justify-center w-24 h-24 rounded-full bg-secondary/50 backdrop-blur-sm text-xs text-muted-foreground transition-all duration-300;
-  border: 1px solid theme("colors.accent-blue / 30%");
+  border: 1px solid theme("colors.glowing-blue / 30%");
 }
 
 .schema-node:hover {
   @apply scale-105;
-  border-color: theme("colors.accent-blue");
+  border-color: theme("colors.glowing-blue");
 }
 
 .schema-node .schema-tooltip {
@@ -395,7 +395,7 @@
 
 .connection-line {
   @apply absolute;
-  background-color: theme("colors.accent-blue / 20%");
+  background-color: theme("colors.glowing-blue / 20%");
   animation: pulse-line 2s infinite ease-in-out;
 }
 
@@ -433,7 +433,7 @@
 }
 
 .holo-social:hover {
-  border-color: theme("colors.accent-blue");
-  background-color: theme("colors.accent-blue / 10%");
-  color: theme("colors.accent-blue");
+  border-color: theme("colors.glowing-blue");
+  background-color: theme("colors.glowing-blue / 10%");
+  color: theme("colors.glowing-blue");
 }
