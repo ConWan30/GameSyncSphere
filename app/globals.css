@@ -270,11 +270,12 @@
 
 /* Buttons */
 .holo-button-primary {
-  @apply bg-gradient-to-r from-accent-blue to-electric-purple text-white font-semibold;
-  @apply border border-accent-blue/30 rounded-lg;
-  @apply hover:shadow-lg hover:shadow-accent-blue/25;
-  @apply transition-all duration-300;
-  @apply relative overflow-hidden;
+  background-image: linear-gradient(to right, theme("colors.accent-blue"), theme("colors.electric-purple"));
+  @apply text-white font-semibold border rounded-lg transition-all duration-300 relative overflow-hidden;
+  border-color: theme("colors.accent-blue / 30%");
+}
+.holo-button-primary:hover {
+  box-shadow: 0 10px 15px -3px theme("colors.accent-blue / 25%"), 0 4px 6px -4px theme("colors.accent-blue / 25%");
 }
 
 .holo-button-primary::before {
@@ -293,18 +294,23 @@
 }
 
 .holo-button-secondary {
-  @apply border-2 border-accent-blue text-accent-blue;
-  @apply hover:bg-accent-blue hover:text-white;
-  @apply transition-all duration-300;
+  @apply border-2 text-accent-blue transition-all duration-300;
+  border-color: theme("colors.accent-blue");
+}
+
+.holo-button-secondary:hover {
+  @apply text-white;
+  background-color: theme("colors.accent-blue");
 }
 
 /* Cards */
 .holo-card {
-  @apply bg-secondary/50 border border-border/20;
-  @apply backdrop-blur-sm rounded-xl;
-  @apply hover:border-accent-blue/40 hover:shadow-lg hover:shadow-accent-blue/10;
-  @apply transition-all duration-300;
-  @apply relative overflow-hidden h-full;
+  @apply bg-secondary/50 border border-border/20 backdrop-blur-sm rounded-xl transition-all duration-300 relative overflow-hidden h-full;
+}
+
+.holo-card:hover {
+  border-color: theme("colors.accent-blue / 40%");
+  box-shadow: theme("boxShadow.lg"), 0 0 10px 0 theme("colors.accent-blue / 10%");
 }
 
 .holo-card::before {
@@ -325,16 +331,21 @@
 
 /* Badges */
 .holo-badge {
-  @apply bg-accent-blue/20 text-accent-blue border border-accent-blue/30;
   @apply px-4 py-2 rounded-full text-sm font-medium;
+  background-color: theme("colors.accent-blue / 20%");
+  color: theme("colors.accent-blue");
+  border: 1px solid theme("colors.accent-blue / 30%");
 }
 
 /* Input */
 .holo-input {
-  @apply bg-secondary/50 border border-border/20;
-  @apply text-foreground placeholder-muted-foreground;
-  @apply focus:border-accent-blue focus:ring-1 focus:ring-accent-blue;
-  @apply transition-all duration-300;
+  @apply bg-secondary/50 border border-border/20 text-foreground placeholder-muted-foreground transition-all duration-300;
+}
+
+.holo-input:focus {
+  @apply ring-1;
+  border-color: theme("colors.accent-blue");
+  --tw-ring-color: theme("colors.accent-blue");
 }
 
 /* Interactive Schema */
@@ -347,7 +358,13 @@
 }
 
 .schema-node {
-  @apply absolute flex flex-col items-center justify-center w-24 h-24 rounded-full border border-accent-blue/30 bg-secondary/50 backdrop-blur-sm text-xs text-muted-foreground transition-all duration-300 hover:scale-105 hover:border-accent-blue;
+  @apply absolute flex flex-col items-center justify-center w-24 h-24 rounded-full bg-secondary/50 backdrop-blur-sm text-xs text-muted-foreground transition-all duration-300;
+  border: 1px solid theme("colors.accent-blue / 30%");
+}
+
+.schema-node:hover {
+  @apply scale-105;
+  border-color: theme("colors.accent-blue");
 }
 
 .schema-node .schema-tooltip {
@@ -376,7 +393,8 @@
 }
 
 .connection-line {
-  @apply absolute bg-accent-blue/20;
+  @apply absolute;
+  background-color: theme("colors.accent-blue / 20%");
   animation: pulse-line 2s infinite ease-in-out;
 }
 
@@ -410,9 +428,11 @@
 
 /* Social Icons */
 .holo-social {
-  @apply w-10 h-10 bg-secondary/50 border border-border/20;
-  @apply rounded-full flex items-center justify-center;
-  @apply hover:border-accent-blue hover:bg-accent-blue/10;
-  @apply transition-all duration-300;
-  @apply text-muted-foreground transition-colors hover:text-accent-blue;
+  @apply w-10 h-10 bg-secondary/50 border border-border/20 rounded-full flex items-center justify-center text-muted-foreground transition-all duration-300;
+}
+
+.holo-social:hover {
+  border-color: theme("colors.accent-blue");
+  background-color: theme("colors.accent-blue / 10%");
+  color: theme("colors.accent-blue");
 }
