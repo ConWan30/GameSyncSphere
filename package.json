@@ -1,13 +1,13 @@
 {
-  "name": "gamesyncsphere-vercel",
+  "name": "gamesyncsphere-landing",
   "version": "1.0.0",
   "private": true,
-  "description": "GameSyncSphere - Pioneer the Future of Gaming Analytics",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@prisma/client": "latest",
@@ -44,6 +44,7 @@
     "cmdk": "latest",
     "cors": "latest",
     "crypto": "latest",
+    "date-fns": "^2.30.0",
     "dotenv": "latest",
     "embla-carousel-react": "latest",
     "express": "latest",
@@ -70,10 +71,11 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9.15.0",
-    "eslint-config-next": "^15.0.3",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.54.0",
+    "eslint-config-next": "15.0.3",
     "postcss": "^8.5",
-    "tailwindcss": "^3.4.14",
+    "tailwindcss": "^3.3.5",
     "typescript": "^5"
   },
   "engines": {
