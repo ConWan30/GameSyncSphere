@@ -294,7 +294,8 @@
 }
 
 .holo-button-secondary {
-  @apply border-2 text-accent-blue transition-all duration-300;
+  @apply border-2 transition-all duration-300;
+  color: theme("colors.accent-blue");
   border-color: theme("colors.accent-blue");
 }
 
