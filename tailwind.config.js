@@ -1,14 +1,14 @@
+const { fontFamily } = require("tailwindcss/defaultTheme")
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
   content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -19,7 +19,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)"],
+        sans: ["var(--font-space-grotesk)", ...fontFamily.sans],
         orbitron: ["var(--font-orbitron)"],
       },
       colors: {
@@ -56,14 +56,12 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom Palette
-        "primary-dark": "#0a0a0f",
-        "gunmetal-gray": "#1a1a2e",
-        "metallic-silver": "#c0c0c0",
         "accent-blue": "#0ea5e9",
-        "neon-green": "#00ff88",
         "electric-purple": "#8b5cf6",
+        "neon-green": "#00ff88",
         "cyber-orange": "#f97316",
+        "gunmetal-gray": "hsl(225 21% 15%)",
+        "metallic-silver": "hsl(210 17% 82%)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -79,10 +77,37 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "holographic-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "holographic-text-glow": {
+          "0%, 100%": { textShadow: "0 0 5px #0ea5e9, 0 0 10px #0ea5e9" },
+          "50%": { textShadow: "0 0 10px #8b5cf6, 0 0 20px #8b5cf6" },
+        },
+        "gradient-flow": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "grid-move": {
+          "0%": { transform: "translate(0, 0)" },
+          "100%": { transform: "translate(50px, 50px)" },
+        },
+        "float-up": {
+          "0%": { transform: "translateY(100vh) scale(0)", opacity: 0 },
+          "10%": { opacity: 1 },
+          "90%": { opacity: 1 },
+          "100%": { transform: "translateY(-100px) scale(1)", opacity: 0 },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "holographic-shift": "holographic-shift 3s ease-in-out infinite",
+        "holographic-text-glow": "holographic-text-glow 3s ease-in-out infinite",
+        "gradient-flow": "gradient-flow 4s ease-in-out infinite",
+        "grid-move": "grid-move 20s linear infinite",
+        "float-up": "float-up linear infinite",
       },
     },
   },

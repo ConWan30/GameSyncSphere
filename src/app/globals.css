@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* These are the same as root, which is fine for a dark-only theme. */
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .holographic-text {
+    @apply text-accent-blue animate-holographic-text-glow;
+  }
+
+  @supports (-webkit-background-clip: text) or (background-clip: text) {
+    .holographic-text {
+      color: transparent;
+      background: linear-gradient(
+        45deg,
+        theme("colors.accent-blue"),
+        theme("colors.electric-purple"),
+        theme("colors.neon-green"),
+        theme("colors.cyber-orange")
+      );
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      @apply animate-holographic-shift;
+    }
+  }
+
+  .gradient-text {
+    background: linear-gradient(
+      135deg,
+      theme("colors.accent-blue") 0%,
+      theme("colors.electric-purple") 50%,
+      theme("colors.neon-green") 100%
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    @apply animate-gradient-flow;
+  }
+
+  .holographic-bg {
+    @apply fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden;
+  }
+
+  .holo-grid {
+    @apply absolute top-0 left-0 w-full h-full animate-grid-move;
+    background-image: linear-gradient(rgba(14, 165, 233, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14, 165, 233, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .floating-particles {
+    @apply absolute w-full h-full overflow-hidden;
+  }
+
+  .particle {
+    @apply absolute w-1 h-1 rounded-full animate-float-up;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.8) 0%, transparent 70%);
+  }
+
+  .nav-link {
+    @apply text-metallic-silver/80 hover:text-white transition-colors duration-300 relative;
+  }
+
+  .nav-link::after {
+    content: "";
+    @apply absolute -bottom-1 left-0 w-0 h-0.5 transition-all duration-300 ease-in-out;
+    background: linear-gradient(90deg, theme("colors.accent-blue"), theme("colors.electric-purple"));
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  .holo-button-primary {
+    @apply bg-gradient-to-r from-accent-blue to-electric-purple text-white font-semibold border border-accent-blue/30 rounded-lg hover:shadow-lg hover:shadow-accent-blue/25 transition-all duration-300 relative overflow-hidden;
+  }
+
+  .holo-button-primary::before {
+    content: "";
+    @apply absolute top-0 -left-full w-full h-full transition-all duration-500 ease-in-out;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  }
+
+  .holo-button-primary:hover::before {
+    @apply left-full;
+  }
+
+  .holo-button-secondary {
+    @apply border-2 border-accent-blue text-accent-blue hover:bg-accent-blue hover:text-white transition-all duration-300;
+  }
+
+  .holo-card {
+    @apply bg-gunmetal-gray/50 border border-accent-blue/20 backdrop-blur-sm rounded-xl hover:border-accent-blue/40 hover:shadow-lg hover:shadow-accent-blue/10 transition-all duration-300 relative overflow-hidden h-full;
+  }
+
+  .holo-card::before {
+    content: "";
+    @apply absolute top-0 left-0 right-0 h-px opacity-0 transition-opacity ease-in-out duration-300;
+    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.5), transparent);
+  }
+
+  .holo-card:hover::before {
+    @apply opacity-100;
+  }
+
+  .holo-badge {
+    @apply bg-accent-blue/20 text-accent-blue border border-accent-blue/30 px-4 py-2 rounded-full text-sm font-medium;
+  }
+
+  .holo-input {
+    @apply bg-gunmetal-gray/50 border border-accent-blue/20 text-white placeholder-metallic-silver/60 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue transition-all duration-300;
+  }
+
+  .holo-social {
+    @apply w-10 h-10 bg-gunmetal-gray/50 border border-accent-blue/20 rounded-full flex items-center justify-center hover:border-accent-blue hover:bg-accent-blue/10 transition-all duration-300 text-metallic-silver/60 hover:text-accent-blue;
+  }
+}
