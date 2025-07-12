@@ -52,11 +52,23 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Custom GameSyncSphere Palette
+        "primary-dark": "#0a0a0f",
+        "gunmetal-gray": "#1a1a2e",
+        "metallic-silver": "#c0c0c0",
+        "accent-blue": "#0ea5e9",
+        "neon-green": "#00ff88",
+        "electric-purple": "#8b5cf6",
+        "cyber-orange": "#f97316",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-inter)"],
+        orbitron: ["var(--font-orbitron)"],
       },
       keyframes: {
         "accordion-down": {
