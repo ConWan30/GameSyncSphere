@@ -19,6 +19,10 @@ module.exports = {
     },
     extend: {
       colors: {
+        "primary-dark": "#0A0A0A",
+        "metallic-silver": "#A9A9A9",
+        "gunmetal-gray": "#2A2A2A",
+        "accent-blue": "#1E3A8A",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -53,6 +57,10 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      fontFamily: {
+        orbitron: ["var(--font-orbitron)"],
+        inter: ["var(--font-inter)"],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -67,35 +75,10 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "holographic-pulse": {
-          "0%, 100%": {
-            opacity: "0.5",
-            transform: "scale(1)",
-          },
-          "50%": {
-            opacity: "1",
-            transform: "scale(1.05)",
-          },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-20px)" },
-        },
-        glow: {
-          "0%, 100%": {
-            boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)",
-          },
-          "50%": {
-            boxShadow: "0 0 40px rgba(59, 130, 246, 0.8), 0 0 60px rgba(59, 130, 246, 0.3)",
-          },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "holographic-pulse": "holographic-pulse 2s ease-in-out infinite",
-        float: "float 3s ease-in-out infinite",
-        glow: "glow 2s ease-in-out infinite alternate",
       },
     },
   },

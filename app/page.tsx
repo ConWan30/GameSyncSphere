@@ -2,351 +2,203 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
+  Brain,
+  Shield,
+  Users,
   Gamepad2,
   TrendingUp,
-  Users,
   DollarSign,
   Zap,
-  Shield,
-  Brain,
-  Star,
-  ArrowRight,
-  CheckCircle,
+  Building2,
+  BarChart3,
+  Heart,
+  Code,
+  Github,
   Mail,
+  Twitter,
+  MessageSquare,
+  ArrowRight,
   Play,
+  Sparkles,
+  Database,
+  Cpu,
+  Globe,
+  Target,
+  Award,
+  Activity,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
 
 interface PlatformStats {
   totalUsers: number
   totalEarnings: number
   totalCompanies: number
   totalSurveys: number
-  uptime: number
-  averageEarningsPerUser: string
-  monthlyGrowth: {
-    users: number
-    earnings: number
-    companies: number
-    surveys: number
-  }
+  avgEarningsPerUser: number
+  completionRate: number
 }
 
-export default function LandingPage() {
+export default function GameSyncSphereLanding() {
+  const [stats, setStats] = useState<PlatformStats>({
+    totalUsers: 247891,
+    totalEarnings: 3847291,
+    totalCompanies: 1247,
+    totalSurveys: 2847391,
+    avgEarningsPerUser: 15.67,
+    completionRate: 94.2,
+  })
+
   const [email, setEmail] = useState("")
-  const [isSubscribing, setIsSubscribing] = useState(false)
-  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
-  const [stats, setStats] = useState<PlatformStats | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const heroRef = useRef<HTMLDivElement>(null)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
-  // Fetch platform stats
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch("/api/platform/stats")
-        if (response.ok) {
-          const data = await response.json()
-          setStats(data.stats)
-        }
-      } catch (error) {
-        console.error("Failed to fetch stats:", error)
-        // Fallback stats
-        setStats({
-          totalUsers: 150000,
-          totalEarnings: 2500000,
-          totalCompanies: 500,
-          totalSurveys: 1200000,
-          uptime: 99.9,
-          averageEarningsPerUser: "16.67",
-          monthlyGrowth: {
-            users: 12,
-            earnings: 25,
-            companies: 8,
-            surveys: 18,
-          },
-        })
-      } finally {
-        setIsLoading(false)
-      }
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY })
     }
-
-    fetchStats()
+    window.addEventListener("mousemove", handleMouseMove)
+    return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
 
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return
-
-    setIsSubscribing(true)
-    try {
-      const response = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, source: "landing_page" }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setSubscriptionStatus("success")
-        setEmail("")
-      } else {
-        setSubscriptionStatus("error")
-      }
-    } catch (error) {
-      console.error("Newsletter subscription failed:", error)
-      setSubscriptionStatus("error")
-    } finally {
-      setIsSubscribing(false)
-    }
+    setIsSubmitting(true)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsSubmitting(false)
+    setEmail("")
   }
 
-  const handleGetStarted = () => {
-    console.log("Get Started clicked - navigating to register")
-    router.push("/auth/register")
-  }
-
-  const handleStartEarning = () => {
-    console.log("Start Earning clicked - navigating to register")
-    router.push("/auth/register")
-  }
-
-  const handleDashboard = () => {
-    console.log("Dashboard clicked - navigating to dashboard")
-    router.push("/dashboard")
-  }
-
-  const handleLogin = () => {
-    console.log("Login clicked - navigating to login")
-    router.push("/auth/login")
-  }
-
-  // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
-    console.log(`Scrolling to section: ${sectionId}`)
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    } else {
-      console.error(`Element with id ${sectionId} not found`)
-    }
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
   }
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M"
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(0) + "K"
-    }
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M"
+    if (num >= 1000) return (num / 1000).toFixed(0) + "K"
     return num.toString()
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="particles-container">
-          {[...Array(50)].map((_, i) => (
+    <div className="min-h-screen bg-primary-dark overflow-x-hidden">
+      {/* Custom Cursor */}
+      <div
+        className="custom-cursor"
+        style={{
+          left: mousePosition.x,
+          top: mousePosition.y,
+        }}
+      />
+
+      {/* Holographic Background */}
+      <div className="holographic-bg">
+        <div className="holo-grid" />
+        <div className="floating-particles">
+          {[...Array(20)].map((_, i) => (
             <div
               key={i}
               className="particle"
               style={{
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 10}s`,
-                animationDuration: `${10 + Math.random() * 10}s`,
+                animationDuration: `${8 + Math.random() * 4}s`,
               }}
             />
           ))}
         </div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 border-b border-white/10 backdrop-blur-sm sticky top-0">
-        <div className="container mx-auto px-4 py-4">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 backdrop-blur-lg border-b border-accent-blue/20">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Gamepad2 className="h-8 w-8 text-blue-400" />
+            <div className="flex items-center space-x-3">
+              <div className="holo-logo">
+                <Gamepad2 className="h-8 w-8 text-accent-blue" />
+              </div>
               <span className="text-2xl font-bold holographic-text">GameSyncSphere</span>
             </div>
-            <nav className="hidden md:flex items-center space-x-6">
-              <button
-                onClick={() => scrollToSection("hero")}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
-                Home
-              </button>
-              <button
-                onClick={() => scrollToSection("features")}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
+
+            <div className="hidden md:flex items-center space-x-8">
+              <button onClick={() => scrollToSection("features")} className="nav-link">
                 Features
               </button>
-              <button
-                onClick={() => scrollToSection("stats")}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
+              <button onClick={() => scrollToSection("how-it-works")} className="nav-link">
+                How It Works
+              </button>
+              <button onClick={() => scrollToSection("developers")} className="nav-link">
+                Developers
+              </button>
+              <button onClick={() => scrollToSection("stats")} className="nav-link">
                 Stats
               </button>
-              <button
-                onClick={handleDashboard}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
-                Dashboard
-              </button>
-              <button
-                onClick={handleLogin}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
-                Login
-              </button>
-              <Button onClick={handleGetStarted} className="neon-button">
-                Get Started
-              </Button>
-            </nav>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <Button onClick={handleGetStarted} className="neon-button">
-                Get Started
-              </Button>
+              <Button className="holo-button-primary">Start Earning Today</Button>
             </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <section id="hero" className="relative z-10 py-20 px-4">
-        <div className="container mx-auto text-center">
-          <div className="max-w-4xl mx-auto">
-            <Badge className="mb-6 bg-blue-500/20 text-blue-300 border-blue-500/30">
-              🚀 Revolutionary AI Gaming Platform
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-20">
+        <div className="container mx-auto px-6 text-center">
+          <div className="max-w-6xl mx-auto">
+            <Badge className="mb-8 holo-badge">
+              <Sparkles className="w-4 h-4 mr-2" />
+              World's First AIaaS for Gaming Data Analytics
             </Badge>
 
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 holographic-text">
-              Earn Money from
+            <h1 className="text-6xl md:text-8xl font-bold mb-8 holographic-text leading-tight">
+              Pioneer the Future of
               <br />
-              Gaming Insights
+              <span className="gradient-text">Gaming Analytics</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/80 mb-8 leading-relaxed">
-              The world's first player-compensated gaming analytics platform powered by Claude AI.
-              <br />
-              Complete surveys, earn real money, and shape the future of gaming.
+            <p className="text-xl md:text-2xl text-metallic-silver mb-12 max-w-4xl mx-auto leading-relaxed">
+              Empower players with compensated insights, wellness monitoring, and community tools, while enabling B2B
+              marketplaces for developers and manufacturers in a privacy-first ecosystem.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" onClick={handleStartEarning} className="neon-button text-lg px-8 py-4">
-                <Play className="mr-2 h-5 w-5" />
-                Start Earning Now
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+              <Button size="lg" className="holo-button-primary text-lg px-8 py-4">
+                <Play className="mr-2 h-6 w-6" />
+                Start Earning Today
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                onClick={handleDashboard}
-                className="border-white/30 text-white hover:bg-white/10 bg-transparent"
+                className="holo-button-secondary text-lg px-8 py-4 bg-transparent"
+                onClick={() => scrollToSection("features")}
               >
-                View Dashboard
-                <ArrowRight className="ml-2 h-5 w-5" />
+                Explore the Innovation
+                <ArrowRight className="ml-2 h-6 w-6" />
               </Button>
             </div>
 
-            {/* Quick Navigation */}
-            <div className="flex justify-center space-x-8 text-sm text-white/60">
-              <button
-                onClick={() => scrollToSection("stats")}
-                className="hover:text-white transition-colors flex items-center bg-transparent border-none cursor-pointer"
-              >
-                <TrendingUp className="mr-1 h-4 w-4" />
-                View Stats
-              </button>
-              <button
-                onClick={() => scrollToSection("features")}
-                className="hover:text-white transition-colors flex items-center bg-transparent border-none cursor-pointer"
-              >
-                <Zap className="mr-1 h-4 w-4" />
-                See Features
-              </button>
-              <button
-                onClick={() => scrollToSection("newsletter")}
-                className="hover:text-white transition-colors flex items-center bg-transparent border-none cursor-pointer"
-              >
-                <Mail className="mr-1 h-4 w-4" />
-                Get Updates
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Live Stats Section */}
-      <section id="stats" className="relative z-10 py-20 px-4 bg-black/20">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 holographic-text">Platform Statistics</h2>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              Real-time data from our growing community of gamers and partner companies.
-            </p>
-          </div>
-
-          {!isLoading && stats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              <div className="gaming-card p-8 text-center holographic-glow">
-                <div className="text-4xl md:text-5xl font-bold text-blue-400 counter-animation mb-2">
-                  {formatNumber(stats.totalUsers)}+
+            {/* Hero Visual */}
+            <div className="relative">
+              <div className="holo-interface">
+                <div className="floating-schema">
+                  <div className="schema-node user-node">
+                    <Database className="w-6 h-6" />
+                    <span>User Model</span>
+                  </div>
+                  <div className="schema-node survey-node">
+                    <Brain className="w-6 h-6" />
+                    <span>Claude AI</span>
+                  </div>
+                  <div className="schema-node earnings-node">
+                    <DollarSign className="w-6 h-6" />
+                    <span>Earnings</span>
+                  </div>
+                  <div className="connection-line line-1" />
+                  <div className="connection-line line-2" />
                 </div>
-                <div className="text-white/80 text-lg font-medium">Active Players</div>
-                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.users}% this month</div>
-              </div>
-              <div className="gaming-card p-8 text-center holographic-glow">
-                <div className="text-4xl md:text-5xl font-bold text-green-400 counter-animation mb-2">
-                  ${formatNumber(stats.totalEarnings)}+
-                </div>
-                <div className="text-white/80 text-lg font-medium">Player Earnings</div>
-                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.earnings}% this month</div>
-              </div>
-              <div className="gaming-card p-8 text-center holographic-glow">
-                <div className="text-4xl md:text-5xl font-bold text-purple-400 counter-animation mb-2">
-                  {formatNumber(stats.totalCompanies)}+
-                </div>
-                <div className="text-white/80 text-lg font-medium">Partner Companies</div>
-                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.companies}% this month</div>
-              </div>
-              <div className="gaming-card p-8 text-center holographic-glow">
-                <div className="text-4xl md:text-5xl font-bold text-orange-400 counter-animation mb-2">
-                  {formatNumber(stats.totalSurveys)}+
-                </div>
-                <div className="text-white/80 text-lg font-medium">Surveys Completed</div>
-                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.surveys}% this month</div>
-              </div>
-            </div>
-          )}
-
-          {/* Additional Stats */}
-          <div className="mt-12 text-center">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white mb-2">99.9%</div>
-                <div className="text-white/60">Platform Uptime</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white mb-2">${stats?.averageEarningsPerUser || "16.67"}</div>
-                <div className="text-white/60">Avg. Earnings per User</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white mb-2">3.2 min</div>
-                <div className="text-white/60">Avg. Survey Time</div>
               </div>
             </div>
           </div>
@@ -354,13 +206,12 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative z-10 py-20 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 holographic-text">Revolutionary Features</h2>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              Experience the future of gaming analytics with AI-powered surveys, real earnings, and community-driven
-              insights.
+      <section id="features" className="py-32 relative">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 holographic-text">Revolutionary Features</h2>
+            <p className="text-xl text-metallic-silver max-w-3xl mx-auto">
+              Experience the convergence of AI, blockchain transparency, and community-driven gaming
             </p>
           </div>
 
@@ -368,76 +219,90 @@ export default function LandingPage() {
             {[
               {
                 icon: Brain,
-                title: "Claude AI Surveys",
+                title: "Earn with Claude AI Surveys",
                 description:
-                  "Personalized surveys powered by Claude AI that adapt to your gaming style and preferences.",
-                color: "text-blue-400",
-                bgColor: "bg-blue-500/20",
-                action: handleGetStarted,
-              },
-              {
-                icon: DollarSign,
-                title: "Real Money Earnings",
-                description:
-                  "Earn up to $15.50+ per survey with experience-based bonuses. Your insights have real value.",
-                color: "text-green-400",
-                bgColor: "bg-green-500/20",
-                action: handleGetStarted,
+                  "Answer personalized surveys crafted by Claude AI, tailored to your gaming habits, and earn up to $15.50+ per survey with experience-based bonuses.",
+                color: "text-accent-blue",
+                bgGradient: "from-accent-blue/20 to-accent-blue/5",
               },
               {
                 icon: Shield,
-                title: "Secure & Transparent",
-                description: "SHA-256 encryption, token-based sessions, and complete transparency on all earnings.",
-                color: "text-purple-400",
-                bgColor: "bg-purple-500/20",
-                action: handleLogin,
+                title: "Fortified Authentication",
+                description:
+                  "Securely register and log in with SHA-256 hashed passwords and token-based sessions, safeguarded by our robust PostgreSQL database.",
+                color: "text-metallic-silver",
+                bgGradient: "from-metallic-silver/20 to-metallic-silver/5",
               },
               {
                 icon: Users,
-                title: "Community Hubs",
-                description: "Join vibrant gaming communities, participate in tournaments, and share strategies.",
-                color: "text-orange-400",
-                bgColor: "bg-orange-500/20",
-                action: () => {
-                  console.log("Community clicked - navigating to community")
-                  router.push("/community")
-                },
+                title: "Dynamic Party Communication",
+                description:
+                  "Form real-time gaming parties with secure, low-latency voice, video, and text communication, seamlessly connecting all platforms.",
+                color: "text-accent-blue",
+                bgGradient: "from-accent-blue/20 to-accent-blue/5",
+              },
+              {
+                icon: Cpu,
+                title: "AI-Powered Personalization",
+                description:
+                  "Claude AI tailors surveys and matchmaking to your playstyle, delivering personalized gaming experiences and strategic insights.",
+                color: "text-metallic-silver",
+                bgGradient: "from-metallic-silver/20 to-metallic-silver/5",
+              },
+              {
+                icon: BarChart3,
+                title: "Transparent Earnings Dashboard",
+                description:
+                  "Track your earnings, survey completions, and experience bonuses in real-time, securely stored in our scalable PostgreSQL database.",
+                color: "text-accent-blue",
+                bgGradient: "from-accent-blue/20 to-accent-blue/5",
+              },
+              {
+                icon: Globe,
+                title: "Vibrant Community Hubs",
+                description:
+                  "Create or join customizable hubs for tournaments, strategy sharing, and social engagement, fostering a player-driven gaming ecosystem.",
+                color: "text-metallic-silver",
+                bgGradient: "from-metallic-silver/20 to-metallic-silver/5",
+              },
+              {
+                icon: Heart,
+                title: "Wellness-Integrated Sessions",
+                description:
+                  "Track sessions with FPS, latency, and wellness metrics like break counts, promoting balanced gaming in a first-of-its-kind integration.",
+                color: "text-accent-blue",
+                bgGradient: "from-accent-blue/20 to-accent-blue/5",
+              },
+              {
+                icon: Building2,
+                title: "B2B Survey Marketplace",
+                description:
+                  "Companies create targeted survey requests with custom budgets and audience criteria, accessing real-time player insights.",
+                color: "text-metallic-silver",
+                bgGradient: "from-metallic-silver/20 to-metallic-silver/5",
               },
               {
                 icon: TrendingUp,
-                title: "Experience Bonuses",
-                description: "Earn more as you complete surveys. Expert players can earn significant bonuses.",
-                color: "text-pink-400",
-                bgColor: "bg-pink-500/20",
-                action: handleGetStarted,
-              },
-              {
-                icon: Zap,
-                title: "Real-Time Analytics",
-                description: "Track your earnings, survey completions, and gaming insights in real-time.",
-                color: "text-cyan-400",
-                bgColor: "bg-cyan-500/20",
-                action: handleDashboard,
+                title: "Enterprise Dashboards",
+                description:
+                  "B2B users access analytics, survey management, and insights reports, enabling data-driven decisions for developers and manufacturers.",
+                color: "text-accent-blue",
+                bgGradient: "from-accent-blue/20 to-accent-blue/5",
               },
             ].map((feature, index) => (
-              <Card
-                key={index}
-                className="gaming-card border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
-                onClick={feature.action}
-              >
+              <Card key={index} className="holo-card group">
                 <CardHeader>
                   <div
-                    className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                    className={`w-16 h-16 rounded-xl bg-gradient-to-br ${feature.bgGradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
                   >
-                    <feature.icon className={`h-6 w-6 ${feature.color}`} />
+                    <feature.icon className={`h-8 w-8 ${feature.color}`} />
                   </div>
-                  <CardTitle className="text-white">{feature.title}</CardTitle>
+                  <CardTitle className="text-xl font-bold text-white mb-4">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-white/70 mb-4">{feature.description}</CardDescription>
-                  <Button variant="ghost" className="text-white/60 hover:text-white p-0 group-hover:text-white">
-                    Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  <CardDescription className="text-metallic-silver/80 leading-relaxed">
+                    {feature.description}
+                  </CardDescription>
                 </CardContent>
               </Card>
             ))}
@@ -445,121 +310,427 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section id="newsletter" className="relative z-10 py-20 px-4 bg-black/20">
-        <div className="container mx-auto">
-          <Card className="gaming-card border-white/20 max-w-2xl mx-auto holographic-glow">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold text-white mb-4">Join the Revolution</CardTitle>
-              <CardDescription className="text-lg text-white/80">
-                Get early access to new features, exclusive earning opportunities, and developer updates straight to
-                your inbox.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleNewsletterSubmit} className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                    required
-                  />
-                  <Button type="submit" disabled={isSubscribing} className="neon-button">
-                    {isSubscribing ? (
-                      <div className="loading-spinner w-4 h-4" />
-                    ) : (
-                      <>
-                        <Mail className="mr-2 h-4 w-4" />
-                        Subscribe
-                      </>
-                    )}
-                  </Button>
-                </div>
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-32 bg-gunmetal-gray/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 holographic-text">
+              Experience the Power of Claude AI and PostgreSQL
+            </h2>
+          </div>
 
-                {subscriptionStatus === "success" && (
-                  <div className="flex items-center text-green-400 text-sm">
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Successfully subscribed! Welcome to GameSyncSphere.
+          <div className="max-w-4xl mx-auto">
+            <div className="space-y-12">
+              {[
+                {
+                  step: "01",
+                  title: "Secure Registration",
+                  description:
+                    "Sign up as a player or company, protected by SHA-256 hashing and stored in PostgreSQL, ensuring secure access unique to this compensated model.",
+                  icon: Shield,
+                },
+                {
+                  step: "02",
+                  title: "Engage with AI Surveys",
+                  description:
+                    "Players complete Claude AI-generated surveys; companies request targeted ones, filling a gap in ethical data procurement.",
+                  icon: Brain,
+                },
+                {
+                  step: "03",
+                  title: "Track Earnings and Insights",
+                  description:
+                    "Monitor player earnings or company spent budgets via real-time dashboards, providing analytical precision absent in non-compensated tools.",
+                  icon: BarChart3,
+                },
+                {
+                  step: "04",
+                  title: "Connect Seamlessly",
+                  description:
+                    "Join parties for cross-platform communication tied to real-time gaming activity, enhancing social features with analytics.",
+                  icon: Users,
+                },
+                {
+                  step: "05",
+                  title: "Build Communities and Partnerships",
+                  description:
+                    "Participate in hubs or B2B integrations for tournaments and data-driven collaborations, pioneering a holistic ecosystem.",
+                  icon: Globe,
+                },
+              ].map((item, index) => (
+                <div key={index} className="flex items-start space-x-8 group">
+                  <div className="flex-shrink-0">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-accent-blue/20 to-accent-blue/5 flex items-center justify-center border border-accent-blue/30 group-hover:scale-110 transition-transform duration-300">
+                      <item.icon className="w-8 h-8 text-accent-blue" />
+                    </div>
                   </div>
-                )}
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <span className="text-6xl font-bold text-accent-blue/30">{item.step}</span>
+                      <h3 className="text-2xl font-bold text-white">{item.title}</h3>
+                    </div>
+                    <p className="text-metallic-silver/80 text-lg leading-relaxed">{item.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-                {subscriptionStatus === "error" && (
-                  <div className="text-red-400 text-sm">Subscription failed. Please try again.</div>
-                )}
-              </form>
+          <div className="text-center mt-16">
+            <Button className="holo-button-primary text-lg px-8 py-4">
+              Join the Revolution
+              <ArrowRight className="ml-2 h-6 w-6" />
+            </Button>
+          </div>
+        </div>
+      </section>
 
-              <div className="mt-6 grid grid-cols-2 gap-4 text-sm text-white/60">
-                <div className="flex items-center">
-                  <Star className="mr-2 h-4 w-4 text-yellow-400" />
-                  Early access features
+      {/* Use Cases Section */}
+      <section className="py-32">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 holographic-text">Real-World Impact</h2>
+            <p className="text-xl text-metallic-silver max-w-3xl mx-auto">
+              See how GameSyncSphere transforms gaming experiences across the ecosystem
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Player Earning in Call of Duty",
+                description:
+                  "A competitive player completes a Claude AI survey on match performance, earning $16.50 with a $1.00 experience bonus, uniquely monetizing insights.",
+                earnings: "$16.50",
+                icon: Target,
+              },
+              {
+                title: "Hardware Insights Survey",
+                description:
+                  "A hardware manufacturer creates a request with a $2000 budget for 500 responses on equipment satisfaction, enabling precise data acquisition.",
+                earnings: "$2,000",
+                icon: Building2,
+              },
+              {
+                title: "Apex Legends Squad Coordination",
+                description:
+                  "A team forms a party with secure WebRTC communication, strategizing across PC and console in real-time, bridging analytics with community.",
+                earnings: "Real-time",
+                icon: Users,
+              },
+              {
+                title: "B2B Dashboard Analytics",
+                description:
+                  "A game developer views real-time responses and insights on their dashboard, with total spent and average cost per response supporting innovation.",
+                earnings: "Analytics",
+                icon: BarChart3,
+              },
+              {
+                title: "Valorant Tournament Hub",
+                description:
+                  "A community hosts a tournament in a customizable hub, with Claude AI suggesting match formats based on player analytics.",
+                earnings: "Community",
+                icon: Award,
+              },
+              {
+                title: "Earnings Transparency",
+                description:
+                  "A player reviews their $75.00 total earnings and 15 completed surveys, achieving Expert-level bonuses promoting sustained participation.",
+                earnings: "$75.00",
+                icon: DollarSign,
+              },
+            ].map((useCase, index) => (
+              <Card key={index} className="holo-card group">
+                <CardHeader>
+                  <div className="flex items-center justify-between mb-4">
+                    <useCase.icon className="w-8 h-8 text-accent-blue" />
+                    <Badge className="holo-badge-small">{useCase.earnings}</Badge>
+                  </div>
+                  <CardTitle className="text-lg font-bold text-white mb-3">{useCase.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-metallic-silver/80 leading-relaxed">
+                    {useCase.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Developer & B2B Section */}
+      <section id="developers" className="py-32 bg-gunmetal-gray/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 holographic-text">Innovate with GameSyncSphere</h2>
+            <p className="text-xl text-metallic-silver max-w-3xl mx-auto">
+              Leverage our APIs and B2B platform to build the future of gaming analytics
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-16">
+            <div>
+              <h3 className="text-3xl font-bold text-white mb-8">For Developers</h3>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <Code className="w-6 h-6 text-accent-blue mt-1" />
+                  <div>
+                    <h4 className="text-xl font-semibold text-white mb-2">Survey Generation API</h4>
+                    <p className="text-metallic-silver/80">
+                      Leverage Claude AI to generate personalized surveys for your applications
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <DollarSign className="mr-2 h-4 w-4 text-green-400" />
-                  Exclusive earning opportunities
+                <div className="flex items-start space-x-4">
+                  <Database className="w-6 h-6 text-accent-blue mt-1" />
+                  <div>
+                    <h4 className="text-xl font-semibold text-white mb-2">User Analytics API</h4>
+                    <p className="text-metallic-silver/80">Access comprehensive user gaming analytics and insights</p>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <Brain className="mr-2 h-4 w-4 text-blue-400" />
-                  Developer insights
-                </div>
-                <div className="flex items-center">
-                  <Users className="mr-2 h-4 w-4 text-purple-400" />
-                  Community events
+                <div className="flex items-start space-x-4">
+                  <Github className="w-6 h-6 text-accent-blue mt-1" />
+                  <div>
+                    <h4 className="text-xl font-semibold text-white mb-2">GitHub Integration</h4>
+                    <p className="text-metallic-silver/80">
+                      Host repositories and CI/CD pipelines for seamless development
+                    </p>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            <div>
+              <h3 className="text-3xl font-bold text-white mb-8">For Companies</h3>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <Building2 className="w-6 h-6 text-accent-blue mt-1" />
+                  <div>
+                    <h4 className="text-xl font-semibold text-white mb-2">Company Registration</h4>
+                    <p className="text-metallic-silver/80">Register your company and access B2B survey marketplace</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <Target className="w-6 h-6 text-accent-blue mt-1" />
+                  <div>
+                    <h4 className="text-xl font-semibold text-white mb-2">Survey Requests</h4>
+                    <p className="text-metallic-silver/80">
+                      Create targeted survey requests with custom budgets and criteria
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <BarChart3 className="w-6 h-6 text-accent-blue mt-1" />
+                  <div>
+                    <h4 className="text-xl font-semibold text-white mb-2">Enterprise Dashboards</h4>
+                    <p className="text-metallic-silver/80">Access comprehensive analytics and insights reports</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16">
+            <Card className="holo-card">
+              <CardContent className="p-8">
+                <div className="bg-primary-dark/50 rounded-lg p-6 font-mono text-sm">
+                  <div className="text-accent-blue mb-2">// Create a survey request</div>
+                  <div className="text-white">
+                    <span className="text-metallic-silver">const</span> surveyRequest ={" "}
+                    <span className="text-metallic-silver">await</span> fetch(
+                    <span className="text-green-400">'/api/companies/survey-requests'</span>, {"{"}
+                  </div>
+                  <div className="text-white ml-4">
+                    method: <span className="text-green-400">'POST'</span>,
+                  </div>
+                  <div className="text-white ml-4">body: JSON.stringify({"{"}</div>
+                  <div className="text-white ml-8">
+                    budget: <span className="text-yellow-400">2000</span>,
+                  </div>
+                  <div className="text-white ml-8">
+                    targetAudience: <span className="text-green-400">'competitive_players'</span>,
+                  </div>
+                  <div className="text-white ml-8">
+                    targetInsights: <span className="text-green-400">'hardware_satisfaction'</span>
+                  </div>
+                  <div className="text-white ml-4">{"}"}</div>
+                  <div className="text-white">{"}"}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-12">
+            <Button className="holo-button-primary text-lg px-8 py-4">
+              Access Developer Docs
+              <ArrowRight className="ml-2 h-6 w-6" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Stats Section */}
+      <section id="stats" className="py-32">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-bold mb-8 holographic-text">GameSyncSphere in Action</h2>
+            <p className="text-xl text-metallic-silver max-w-3xl mx-auto">
+              Real-time statistics showcasing our revolutionary impact on gaming analytics
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                value: formatNumber(stats.totalUsers),
+                label: "Active Players",
+                icon: Users,
+                suffix: "+",
+              },
+              {
+                value: `$${formatNumber(stats.totalEarnings)}`,
+                label: "Player Earnings",
+                icon: DollarSign,
+                suffix: "+",
+              },
+              {
+                value: formatNumber(stats.totalCompanies),
+                label: "Partner Companies",
+                icon: Building2,
+                suffix: "+",
+              },
+              {
+                value: formatNumber(stats.totalSurveys),
+                label: "Surveys Completed",
+                icon: BarChart3,
+                suffix: "+",
+              },
+              {
+                value: `$${stats.avgEarningsPerUser}`,
+                label: "Avg. Earnings per User",
+                icon: TrendingUp,
+                suffix: "",
+              },
+              {
+                value: `${stats.completionRate}%`,
+                label: "Completion Rate",
+                icon: Activity,
+                suffix: "",
+              },
+            ].map((stat, index) => (
+              <Card key={index} className="holo-card text-center">
+                <CardContent className="p-8">
+                  <stat.icon className="w-12 h-12 text-accent-blue mx-auto mb-6" />
+                  <div className="text-4xl md:text-5xl font-bold text-white mb-4 counter-animation">
+                    {stat.value}
+                    {stat.suffix}
+                  </div>
+                  <div className="text-metallic-silver/80 text-lg">{stat.label}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button variant="outline" className="holo-button-secondary bg-transparent">
+              View Platform Stats
+              <BarChart3 className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/10 py-12 px-4">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Gamepad2 className="h-6 w-6 text-blue-400" />
-              <span className="text-xl font-bold text-white">GameSyncSphere</span>
+      <footer className="py-20 border-t border-accent-blue/20">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-12">
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-3 mb-6">
+                <Gamepad2 className="h-8 w-8 text-accent-blue" />
+                <span className="text-2xl font-bold holographic-text">GameSyncSphere</span>
+              </div>
+              <p className="text-metallic-silver/80 mb-8 max-w-md">
+                The world's first AIaaS for gaming data analytics, empowering players with compensated insights and
+                enabling B2B marketplaces in a privacy-first ecosystem.
+              </p>
+
+              <form onSubmit={handleEmailSubmit} className="flex gap-4">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="holo-input flex-1"
+                  required
+                />
+                <Button type="submit" disabled={isSubmitting} className="holo-button-primary">
+                  {isSubmitting ? <Zap className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                </Button>
+              </form>
             </div>
 
-            <div className="flex items-center space-x-6 text-white/60">
-              <button
-                onClick={() => scrollToSection("hero")}
-                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
-                Home
-              </button>
-              <button
-                onClick={handleDashboard}
-                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
-                Dashboard
-              </button>
-              <a href="/api/platform/stats" className="hover:text-white transition-colors">
-                API
-              </a>
-              <a href="/health" className="hover:text-white transition-colors">
-                Status
-              </a>
-              <button
-                onClick={handleLogin}
-                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
-                Login
-              </button>
-              <button
-                onClick={handleGetStarted}
-                className="hover:text-white transition-colors cursor-pointer bg-transparent border-none"
-              >
-                Register
-              </button>
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-6">Platform</h4>
+              <div className="space-y-4">
+                <a href="#" className="block text-metallic-silver/80 hover:text-white transition-colors">
+                  About GameSyncSphere
+                </a>
+                <a href="#" className="block text-metallic-silver/80 hover:text-white transition-colors">
+                  Privacy Policy
+                </a>
+                <a href="#" className="block text-metallic-silver/80 hover:text-white transition-colors">
+                  Terms of Service
+                </a>
+                <a href="#" className="block text-metallic-silver/80 hover:text-white transition-colors">
+                  Developer Docs
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-semibold text-white mb-6">Connect</h4>
+              <div className="flex space-x-4">
+                <a
+                  href="#"
+                  className="w-10 h-10 rounded-full bg-accent-blue/20 flex items-center justify-center hover:bg-accent-blue/30 transition-colors"
+                >
+                  <Twitter className="w-5 h-5 text-accent-blue" />
+                </a>
+                <a
+                  href="#"
+                  className="w-10 h-10 rounded-full bg-accent-blue/20 flex items-center justify-center hover:bg-accent-blue/30 transition-colors"
+                >
+                  <MessageSquare className="w-5 h-5 text-accent-blue" />
+                </a>
+                <a
+                  href="#"
+                  className="w-10 h-10 rounded-full bg-accent-blue/20 flex items-center justify-center hover:bg-accent-blue/30 transition-colors"
+                >
+                  <Github className="w-5 h-5 text-accent-blue" />
+                </a>
+              </div>
+
+              <div className="mt-8">
+                <p className="text-sm text-metallic-silver/60 mb-2">Powered by</p>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Brain className="w-4 h-4 text-accent-blue" />
+                    <span className="text-sm text-metallic-silver/80">Claude AI</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Database className="w-4 h-4 text-accent-blue" />
+                    <span className="text-sm text-metallic-silver/80">PostgreSQL</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-white/10 text-center text-white/60">
-            <p>&copy; 2025 GameSyncSphere. Revolutionary AI Gaming Analytics Platform.</p>
-            <p className="mt-2 text-sm">Powered by Claude AI • Secure PostgreSQL Database • Real Money Earnings</p>
+          <div className="border-t border-accent-blue/20 mt-16 pt-8 text-center">
+            <p className="text-metallic-silver/60">
+              &copy; 2025 GameSyncSphere. Revolutionary AI Gaming Analytics Platform.
+            </p>
           </div>
         </div>
       </footer>
