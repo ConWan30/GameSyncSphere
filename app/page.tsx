@@ -1,3 +1,9 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -5,6 +11,84 @@ import { Badge } from "@/components/ui/badge"
 import { Code, Gamepad2, Users, BarChart, Twitter, Github, Bot } from "lucide-react"
 
 export default function HomePage() {
+  const [email, setEmail] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState("")
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+    setIsSubmitting(true)
+    setMessage("")
+
+    try {
+      const response = await fetch(
+        // This connects to YOUR Railway URL
+        `${process.env.NEXT_PUBLIC_API_URL || "https://gamesyncsphere-production.up.railway.app"}/api/newsletter`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        },
+      )
+
+      if (response.ok) {
+        setMessage("Success! You've been added to the waitlist.")
+        setEmail("")
+      } else {
+        const errorData = await response.json()
+        setMessage(errorData.message || "An error occurred. Please try again.")
+      }
+    } catch (error) {
+      console.error("Waitlist submission error:", error)
+      setMessage("Could not connect to the server. Please try again later.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const featureCards = [
+    {
+      icon: Users,
+      title: "AI-Powered Matchmaking",
+      description: "Our Claude-powered AI finds you the perfect teammates based on skill, playstyle, and personality.",
+      color: "text-accent-blue",
+    },
+    {
+      icon: BarChart,
+      title: "Unified Game Stats",
+      description: "Sync all your gaming accounts and see your progress across all titles in one unified dashboard.",
+      color: "text-neon-green",
+    },
+    {
+      icon: Bot,
+      title: "Personalized Surveys",
+      description: "Engage with our AI to provide feedback on games and get rewarded for your insights.",
+      color: "text-electric-purple",
+    },
+  ]
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-primary-dark text-metallic-silver overflow-x-hidden">
       <div className="holographic-bg">
@@ -70,41 +154,27 @@ export default function HomePage() {
             <h2 className="text-3xl md:text-4xl font-bold font-orbitron text-center mb-12 gradient-text">
               Platform Features
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="holo-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl">
-                    <Users className="text-accent-blue" />
-                    AI-Powered Matchmaking
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  Our Claude-powered AI finds you the perfect teammates based on skill, playstyle, and personality.
-                </CardContent>
-              </Card>
-              <Card className="holo-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl">
-                    <BarChart className="text-neon-green" />
-                    Unified Game Stats
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  Sync all your gaming accounts and see your progress across all titles in one unified dashboard.
-                </CardContent>
-              </Card>
-              <Card className="holo-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl">
-                    <Bot className="text-electric-purple" />
-                    Personalized Surveys
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  Engage with our AI to provide feedback on games and get rewarded for your insights.
-                </CardContent>
-              </Card>
-            </div>
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              variants={containerVariants}
+            >
+              {featureCards.map((feature, index) => (
+                <motion.div key={index} variants={itemVariants}>
+                  <Card className="holo-card h-full">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3 text-xl">
+                        <feature.icon className={feature.color} />
+                        {feature.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>{feature.description}</CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </section>
 
@@ -150,11 +220,21 @@ export default function HomePage() {
               Be the first to experience the next generation of gaming. Sign up for our waitlist and get exclusive
               updates.
             </p>
-            <form className="max-w-md mx-auto flex gap-2">
-              <Input type="email" placeholder="Enter your email" className="holo-input flex-1" />
-              <Button type="submit" className="holo-button-primary">
-                Sign Up
-              </Button>
+            <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto flex flex-col gap-4">
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="holo-input flex-1"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <Button type="submit" className="holo-button-primary" disabled={isSubmitting}>
+                  {isSubmitting ? "Signing Up..." : "Sign Up"}
+                </Button>
+              </div>
+              {message && <p className="text-sm text-neon-green">{message}</p>}
             </form>
           </div>
         </section>

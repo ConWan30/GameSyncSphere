@@ -8,13 +8,13 @@
     --font-orbitron: "Orbitron", monospace;
 
     /* GameSyncSphere Color Palette */
-    --primary-dark: #0a0a0f;
-    --gunmetal-gray: #1a1a2e;
-    --metallic-silver: #c0c0c0;
-    --accent-blue: #0ea5e9;
-    --neon-green: #00ff88;
-    --electric-purple: #8b5cf6;
-    --cyber-orange: #f97316;
+    --primary-dark: 225 21% 10%;
+    --gunmetal-gray: 225 21% 15%;
+    --metallic-silver: 210 17% 82%;
+    --accent-blue: 211 100% 50%;
+    --neon-green: 136 100% 50%;
+    --electric-purple: 265 100% 58%;
+    --cyber-orange: 30 100% 50%;
 
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -36,6 +36,7 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     --radius: 0.5rem;
+    --white: 255 100% 100%; /* Added white color variable */
   }
 
   .dark {
@@ -68,6 +69,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter);
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
   .font-orbitron {
     font-family: var(--font-orbitron);
@@ -82,6 +84,9 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: holographic-shift 3s ease-in-out infinite;
+  color: var(--white); /* Updated to use the new white color variable */
+  text-shadow: 0 0 5px var(--accent-blue), 0 0 10px var(--accent-blue), 0 0 20px var(--electric-purple), 0 0 40px
+    var(--electric-purple);
 }
 
 .gradient-text {
@@ -182,7 +187,7 @@
 
 /* Navigation */
 .nav-link {
-  @apply text-metallic-silver hover:text-accent-blue transition-colors duration-300 relative;
+  @apply text-metallic-silver/80 hover:text-white transition-colors duration-300 relative;
 }
 
 .nav-link::after {
@@ -236,7 +241,7 @@
   @apply backdrop-blur-sm rounded-xl;
   @apply hover:border-accent-blue/40 hover:shadow-lg hover:shadow-accent-blue/10;
   @apply transition-all duration-300;
-  @apply relative overflow-hidden;
+  @apply relative overflow-hidden h-full;
 }
 
 .holo-card::before {
@@ -271,75 +276,73 @@
 
 /* Interactive Schema */
 .holo-interface {
-  @apply relative w-full max-w-4xl mx-auto h-96;
-  @apply flex items-center justify-center;
+  @apply relative w-full max-w-2xl mx-auto h-64 flex items-center justify-center;
 }
 
 .floating-schema {
   @apply relative w-full h-full;
-  @apply flex items-center justify-center;
 }
 
 .schema-node {
-  @apply absolute bg-gunmetal-gray/80 border border-accent-blue/30;
-  @apply rounded-lg p-4 backdrop-blur-sm;
-  @apply flex flex-col items-center space-y-2;
-  @apply text-sm font-medium text-white;
-  @apply hover:border-accent-blue hover:shadow-lg hover:shadow-accent-blue/20;
-  @apply transition-all duration-300;
-  @apply min-w-[120px];
+  @apply absolute flex flex-col items-center justify-center w-24 h-24 rounded-full border border-accent-blue/30 bg-gunmetal-gray/50 backdrop-blur-sm text-xs text-metallic-silver transition-all duration-300 hover:scale-105 hover:border-accent-blue;
 }
 
-.schema-node:hover .schema-tooltip {
-  @apply opacity-100 visible;
-}
-
-.schema-tooltip {
-  @apply absolute top-full mt-2 left-1/2 transform -translate-x-1/2;
-  @apply bg-primary-dark border border-accent-blue/30 rounded-lg p-3;
-  @apply opacity-0 invisible transition-all duration-300;
-  @apply z-10 whitespace-nowrap;
+.schema-node .schema-tooltip {
+  @apply absolute bottom-full mb-2 w-max px-2 py-1 text-xs bg-primary-dark border border-accent-blue/30 rounded-md opacity-0 invisible transition-all group-hover:opacity-100 group-hover:visible;
 }
 
 .user-node {
-  top: 20%;
-  left: 10%;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
 }
 .survey-node {
-  top: 10%;
-  right: 20%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 .company-node {
-  bottom: 20%;
-  left: 15%;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
 }
 .earnings-node {
-  bottom: 10%;
-  right: 10%;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .connection-line {
-  @apply absolute border-t border-accent-blue/30;
-  @apply animate-pulse;
+  @apply absolute bg-accent-blue/20;
+  animation: pulse-line 2s infinite ease-in-out;
+}
+
+@keyframes pulse-line {
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .line-1 {
-  top: 35%;
-  left: 25%;
+  top: 50%;
+  left: 10%;
   width: 30%;
-  transform: rotate(15deg);
+  height: 1px;
+  transform-origin: left;
 }
 .line-2 {
-  bottom: 35%;
-  left: 30%;
-  width: 25%;
-  transform: rotate(-20deg);
+  top: 25%;
+  left: 50%;
+  width: 1px;
+  height: 25%;
+  transform-origin: top;
 }
 .line-3 {
   top: 50%;
-  right: 25%;
-  width: 20%;
-  transform: rotate(45deg);
+  right: 10%;
+  width: 30%;
+  height: 1px;
+  transform-origin: right;
 }
 
 /* Social Icons */
@@ -348,4 +351,5 @@
   @apply rounded-full flex items-center justify-center;
   @apply hover:border-accent-blue hover:bg-accent-blue/10;
   @apply transition-all duration-300;
+  @apply text-metallic-silver/60 transition-colors hover:text-accent-blue;
 }
