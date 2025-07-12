@@ -1,8 +1,6 @@
 "use client"
 
-import { Suspense, useRef, useState, useEffect } from "react"
-import { Canvas, useFrame } from "@react-three/fiber"
-import { Text3D, Center, Float, useMatcapTexture, OrbitControls } from "@react-three/drei"
+import { useRef, useState, useEffect } from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import {
   BrainCircuit,
@@ -17,41 +15,10 @@ import {
   Twitter,
   Github,
   Mail,
+  Database,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-function Rig() {
-  return useFrame((state, delta) => {
-    state.camera.position.x = (state.mouse.x * state.viewport.width) / 20
-    state.camera.position.y = (state.mouse.y * state.viewport.height) / 20
-    state.camera.lookAt(0, 0, 0)
-  })
-}
-
-function Hero3DText() {
-  const [matcapTexture] = useMatcapTexture("7B5254_E9DCC7_B19986_C8AC91", 256)
-  return (
-    <Float speed={1} rotationIntensity={0.5} floatIntensity={0.5}>
-      <Center>
-        <Text3D
-          font="/fonts/Geist_Bold.json"
-          size={1}
-          height={0.2}
-          curveSegments={12}
-          bevelEnabled
-          bevelThickness={0.02}
-          bevelSize={0.02}
-          bevelOffset={0}
-          bevelSegments={5}
-        >
-          {`GameSyncSphere`}
-          <meshMatcapMaterial matcap={matcapTexture} />
-        </Text3D>
-      </Center>
-    </Float>
-  )
-}
 
 const FeatureCard = ({ icon: Icon, title, description, index }) => {
   const ref = useRef(null)
@@ -188,19 +155,16 @@ export default function LandingPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative h-screen w-full flex flex-col items-center justify-center">
-          <div className="absolute inset-0 z-0">
-            <Canvas camera={{ position: [0, 0, 5] }}>
-              <Suspense fallback={null}>
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} />
-                <Hero3DText />
-                <Rig />
-              </Suspense>
-            </Canvas>
-          </div>
-          <div className="relative z-10 text-center p-4">
-            <h2 className="font-orbitron text-xl md:text-2xl mt-48 text-metallic-silver/80">
+        <section className="relative h-screen w-full flex flex-col items-center justify-center text-center p-4">
+          <div className="absolute inset-0 bg-grid-pattern opacity-10 z-0"></div>
+          <div className="relative z-10">
+            <h1
+              className="font-orbitron text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter animate-float"
+              style={{ textShadow: "0 0 15px var(--glowing-blue), 0 0 30px var(--glowing-blue)" }}
+            >
+              GameSyncSphere
+            </h1>
+            <h2 className="font-orbitron text-xl md:text-2xl mt-4 text-metallic-silver/80">
               Pioneer the Future of Gaming Analytics
             </h2>
             <p className="mt-4 max-w-3xl mx-auto text-metallic-silver/70">
@@ -252,20 +216,23 @@ export default function LandingPage() {
               A streamlined overview of our platform’s core functionality, including B2B flows and research-supported
               innovation.
             </p>
-            <div className="relative h-[400px] w-full">
-              <Canvas>
-                <ambientLight intensity={0.2} />
-                <pointLight position={[0, 5, 5]} />
-                <Suspense fallback={null}>
-                  <group>
-                    <SchemaNode position={[-3, 1, 0]} text="Players" />
-                    <SchemaNode position={[3, 1, 0]} text="Companies" />
-                    <SchemaNode position={[0, -2, 0]} text="PostgreSQL DB" />
-                    <SchemaNode position={[0, 3, -1]} text="Claude AI" />
-                  </group>
-                </Suspense>
-                <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
-              </Canvas>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+              <div className="p-4 text-center holographic-border bg-gunmetal-gray/50 rounded-lg">
+                <Users className="mx-auto w-10 h-10 mb-2 text-glowing-blue" />
+                <h3 className="font-orbitron">Players</h3>
+              </div>
+              <div className="p-4 text-center holographic-border bg-gunmetal-gray/50 rounded-lg">
+                <Store className="mx-auto w-10 h-10 mb-2 text-glowing-blue" />
+                <h3 className="font-orbitron">Companies</h3>
+              </div>
+              <div className="p-4 text-center holographic-border bg-gunmetal-gray/50 rounded-lg">
+                <BrainCircuit className="mx-auto w-10 h-10 mb-2 text-glowing-blue" />
+                <h3 className="font-orbitron">Claude AI</h3>
+              </div>
+              <div className="p-4 text-center holographic-border bg-gunmetal-gray/50 rounded-lg">
+                <Database className="mx-auto w-10 h-10 mb-2 text-glowing-blue" />
+                <h3 className="font-orbitron">PostgreSQL</h3>
+              </div>
             </div>
             <Button size="lg" className="cta-primary mt-8">
               Join the Revolution
@@ -294,23 +261,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
-}
-
-function SchemaNode({ position, text }) {
-  const ref = useRef()
-  const [hovered, setHover] = useState(false)
-  useFrame(() => (ref.current.rotation.y += 0.01))
-  return (
-    <group position={position}>
-      <mesh ref={ref} onPointerOver={() => setHover(true)} onPointerOut={() => setHover(false)}>
-        <boxGeometry args={[1.5, 1.5, 1.5]} />
-        <meshStandardMaterial color={hovered ? "#1E3A8A" : "#2A2A2A"} wireframe />
-      </mesh>
-      <Text3D font="/fonts/Geist_Regular.json" size={0.3} height={0.05} position={[-0.5, 0, 1]}>
-        {text}
-        <meshStandardMaterial color={"#A9A9A9"} />
-      </Text3D>
-    </group>
   )
 }
