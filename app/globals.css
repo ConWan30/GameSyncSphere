@@ -4,32 +4,31 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --background: 215 100% 12%; /* deep-navy */
+    --foreground: 210 40% 98%;
+    --card: 215 100% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 215 100% 12%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 215 100% 12%;
+    --secondary: 215 28% 25%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 215 28% 25%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 215 28% 25%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --radius: 0.5rem;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 28% 25%;
+    --input: 215 28% 25%;
+    --ring: 148 44% 55%; /* emerald-green */
 
     /* Custom Palette */
-    --charcoal-black: #0a0a0a;
-    --gunmetal-gray: #2a2a2a;
-    --metallic-silver: #a9a9a9;
-    --glowing-blue: #1e3a8a;
+    --deep-navy: #001f3f;
+    --gold: #ffd700;
+    --slate-gray: #708090;
+    --emerald-green: #50c878;
   }
 
   .dark {
@@ -60,8 +59,18 @@
     @apply border-border;
   }
   body {
-    @apply bg-charcoal-black text-metallic-silver;
-    font-family: var(--font-inter);
+    background-color: var(--deep-navy);
+    color: var(--slate-gray);
+    font-family: var(--font-montserrat);
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-rajdhani);
+    color: theme("colors.gold");
   }
   .font-orbitron {
     font-family: var(--font-orbitron);
@@ -84,15 +93,7 @@
     z-index: -1;
     margin: -1px;
     border-radius: inherit;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--glowing-blue) / 0.3),
-      hsl(var(--glowing-blue) / 0.1),
-      hsl(var(--glowing-blue) / 0.3)
-    );
-  }
-
-  .holographic-border-pulse::before {
+    background: linear-gradient(135deg, hsl(var(--ring) / 0.3), hsl(var(--ring) / 0.1), hsl(var(--ring) / 0.3));
     animation: pulse-border 4s infinite ease-in-out;
   }
 
@@ -106,8 +107,12 @@
     }
   }
 
+  .holographic-border-pulse::before {
+    animation: pulse-border 4s infinite ease-in-out;
+  }
+
   .holographic-glow {
-    box-shadow: 0 0 15px hsl(var(--glowing-blue) / 0.2), 0 0 30px hsl(var(--glowing-blue) / 0.1);
+    box-shadow: 0 0 15px hsl(var(--ring) / 0.2), 0 0 30px hsl(var(--ring) / 0.1);
   }
 
   .cta-button {
@@ -115,11 +120,23 @@
   }
 
   .cta-primary {
-    @apply cta-button bg-glowing-blue text-white hover:bg-blue-700 shadow-[0_0_20px_theme(colors.blue.800)];
+    background-color: var(--emerald-green);
+    color: var(--deep-navy);
+    font-weight: 600;
+    box-shadow: 0 0 20px var(--emerald-green);
+  }
+  .cta-primary:hover {
+    background-color: hsl(148 44% 65%);
   }
 
   .cta-secondary {
-    @apply cta-button border-2 border-glowing-blue text-glowing-blue bg-transparent hover:bg-glowing-blue hover:text-white;
+    @apply cta-button border-2 bg-transparent;
+    border-color: var(--emerald-green);
+    color: var(--emerald-green);
+  }
+  .cta-secondary:hover {
+    background-color: var(--emerald-green);
+    color: var(--deep-navy);
   }
 }
 
@@ -270,12 +287,12 @@
 
 /* Buttons */
 .holo-button-primary {
-  background-color: theme("colors.glowing-blue");
+  background-color: theme("colors.emerald-green");
   @apply text-white font-semibold border rounded-lg transition-all duration-300 relative overflow-hidden;
-  border-color: theme("colors.glowing-blue / 30%");
+  border-color: theme("colors.emerald-green / 30%");
 }
 .holo-button-primary:hover {
-  box-shadow: 0 10px 15px -3px theme("colors.glowing-blue / 25%"), 0 4px 6px -4px theme("colors.glowing-blue / 25%");
+  box-shadow: 0 10px 15px -3px theme("colors.emerald-green / 25%"), 0 4px 6px -4px theme("colors.emerald-green / 25%");
 }
 
 .holo-button-primary::before {
@@ -295,13 +312,13 @@
 
 .holo-button-secondary {
   @apply border-2 transition-all duration-300;
-  color: theme("colors.glowing-blue");
-  border-color: theme("colors.glowing-blue");
+  color: theme("colors.emerald-green");
+  border-color: theme("colors.emerald-green");
 }
 
 .holo-button-secondary:hover {
   @apply text-white;
-  background-color: theme("colors.glowing-blue");
+  background-color: theme("colors.emerald-green");
 }
 
 /* Cards */
@@ -310,8 +327,8 @@
 }
 
 .holo-card:hover {
-  border-color: theme("colors.glowing-blue / 40%");
-  box-shadow: theme("boxShadow.lg"), 0 0 10px 0 theme("colors.glowing-blue / 10%");
+  border-color: theme("colors.emerald-green / 40%");
+  box-shadow: theme("boxShadow.lg"), 0 0 10px 0 theme("colors.emerald-green / 10%");
 }
 
 .holo-card::before {
@@ -333,9 +350,9 @@
 /* Badges */
 .holo-badge {
   @apply px-4 py-2 rounded-full text-sm font-medium;
-  background-color: theme("colors.glowing-blue / 20%");
-  color: theme("colors.glowing-blue");
-  border: 1px solid theme("colors.glowing-blue / 30%");
+  background-color: theme("colors.emerald-green / 20%");
+  color: theme("colors.emerald-green");
+  border: 1px solid theme("colors.emerald-green / 30%");
 }
 
 /* Input */
@@ -345,8 +362,8 @@
 
 .holo-input:focus {
   @apply ring-1;
-  border-color: theme("colors.glowing-blue");
-  --tw-ring-color: theme("colors.glowing-blue");
+  border-color: theme("colors.emerald-green");
+  --tw-ring-color: theme("colors.emerald-green");
 }
 
 /* Interactive Schema */
@@ -360,12 +377,12 @@
 
 .schema-node {
   @apply absolute flex flex-col items-center justify-center w-24 h-24 rounded-full bg-secondary/50 backdrop-blur-sm text-xs text-muted-foreground transition-all duration-300;
-  border: 1px solid theme("colors.glowing-blue / 30%");
+  border: 1px solid theme("colors.emerald-green / 30%");
 }
 
 .schema-node:hover {
   @apply scale-105;
-  border-color: theme("colors.glowing-blue");
+  border-color: theme("colors.emerald-green");
 }
 
 .schema-node .schema-tooltip {
@@ -395,7 +412,7 @@
 
 .connection-line {
   @apply absolute;
-  background-color: theme("colors.glowing-blue / 20%");
+  background-color: theme("colors.emerald-green / 20%");
   animation: pulse-line 2s infinite ease-in-out;
 }
 
@@ -433,7 +450,7 @@
 }
 
 .holo-social:hover {
-  border-color: theme("colors.glowing-blue");
-  background-color: theme("colors.glowing-blue / 10%");
-  color: theme("colors.glowing-blue");
+  border-color: theme("colors.emerald-green");
+  background-color: theme("colors.emerald-green / 10%");
+  color: theme("colors.emerald-green");
 }

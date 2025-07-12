@@ -1,25 +1,24 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Orbitron, Inter } from "next/font/google"
+import { Montserrat, Rajdhani } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
-import { ThemeProvider } from "@/components/theme-provider"
 
-const orbitron = Orbitron({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  variable: "--font-orbitron",
-  weight: ["400", "700", "900"],
+  variable: "--font-montserrat",
 })
 
-const inter = Inter({
+const rajdhani = Rajdhani({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "700"],
+  variable: "--font-rajdhani",
 })
 
 export const metadata: Metadata = {
   title: "GameSyncSphere: Pioneer the Future of Gaming Analytics",
   description:
-    "The world's first AIaaS for gaming data analytics. Empowering players with compensated insights, wellness monitoring, and a B2B marketplace for developers.",
+    "The world's first AIaaS for gaming data analytics, empowering players with compensated insights, wellness monitoring, and community tools.",
   keywords: [
     "gaming earning platform",
     "Claude AI gaming surveys",
@@ -33,15 +32,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={cn("bg-charcoal-black font-sans antialiased", orbitron.variable, inter.variable)}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          {children}
-        </ThemeProvider>
+    <html lang="en" className="dark">
+      <body className={cn("min-h-screen font-sans antialiased", montserrat.variable, rajdhani.variable)}>
+        {children}
       </body>
     </html>
   )

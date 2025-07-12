@@ -12,8 +12,8 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)"],
-        orbitron: ["var(--font-orbitron)"],
+        sans: ["var(--font-montserrat)"],
+        heading: ["var(--font-rajdhani)"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -49,10 +49,10 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        "charcoal-black": "var(--charcoal-black)",
-        "gunmetal-gray": "var(--gunmetal-gray)",
-        "metallic-silver": "var(--metallic-silver)",
-        "glowing-blue": "var(--glowing-blue)",
+        "deep-navy": "var(--deep-navy)",
+        gold: "var(--gold)",
+        "slate-gray": "var(--slate-gray)",
+        "emerald-green": "var(--emerald-green)",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -70,13 +70,13 @@ module.exports = {
         },
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-20px)" },
+          "50%": { transform: "translateY(-15px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        float: "float 6s ease-in-out infinite",
+        float: "float 5s ease-in-out infinite",
       },
     },
   },
