@@ -1,13 +1,12 @@
 {
-  "name": "gamesyncsphere-landing",
-  "version": "1.0.0",
+  "name": "gamesyncsphere",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start",
-    "type-check": "tsc --noEmit"
+    "start": "next start"
   },
   "dependencies": {
     "@prisma/client": "latest",
@@ -71,14 +70,11 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "autoprefixer": "^10.4.16",
-    "eslint": "^8.54.0",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "postcss": "^8.5",
-    "tailwindcss": "^3.3.5",
+    "tailwindcss": "^3.3.0",
     "typescript": "^5"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   }
 }
