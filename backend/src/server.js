@@ -4,17 +4,18 @@ const crypto = require("crypto")
 const axios = require("axios")
 const path = require("path")
 
+// Load environment variables
 require("dotenv").config()
 
 const app = express()
 
+// Basic middleware
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
       "https://gamesyncsphere-analytics.vercel.app",
       "https://gamesyncsphere.vercel.app",
-      "https://v0-game-sync-sphere-xn.vercel.app",
       process.env.FRONTEND_URL,
       process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
     ].filter(Boolean),
@@ -27,6 +28,7 @@ app.use(
 app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true, limit: "10mb" }))
 
+// Security headers
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff")
   res.setHeader("X-Frame-Options", "DENY")
@@ -35,14 +37,17 @@ app.use((req, res, next) => {
   next()
 })
 
+// In-memory storage for fallback
 const users = new Map()
 const companies = new Map()
 const sessions = new Map()
 const newsletters = new Map()
 
+// Database setup
 let prisma = null
 let databaseReady = false
 
+// Initialize database connection
 async function initializeDatabase() {
   try {
     console.log("🔗 Initializing database connection...")
@@ -65,6 +70,7 @@ async function initializeDatabase() {
     await prisma.$connect()
     console.log("✅ Database connected successfully!")
 
+    // Test the connection
     await prisma.$queryRaw`SELECT 1`
     console.log("✅ Database query test passed!")
 
@@ -76,6 +82,7 @@ async function initializeDatabase() {
   }
 }
 
+// Utility functions
 function hashPassword(password) {
   return crypto
     .createHash("sha256")
@@ -87,6 +94,7 @@ function generateToken() {
   return crypto.randomBytes(32).toString("hex")
 }
 
+// Newsletter subscription endpoint
 app.post("/api/newsletter/subscribe", async (req, res) => {
   try {
     const { email, source = "landing_page" } = req.body
@@ -129,6 +137,7 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
   }
 })
 
+// Contact form endpoint
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, company, message, type = "general" } = req.body
@@ -159,6 +168,7 @@ app.post("/api/contact", async (req, res) => {
   }
 })
 
+// Enhanced platform stats for landing page
 app.get("/api/platform/stats", async (req, res) => {
   try {
     const stats = {
@@ -173,6 +183,7 @@ app.get("/api/platform/stats", async (req, res) => {
     if (databaseReady && prisma) {
       try {
         const [userCount, companyCount] = await Promise.all([prisma.user.count(), prisma.company.count()])
+
         stats.totalUsers = userCount
         stats.totalCompanies = companyCount
       } catch (dbError) {
@@ -180,6 +191,7 @@ app.get("/api/platform/stats", async (req, res) => {
       }
     }
 
+    // Add demo numbers for landing page
     const enhancedStats = {
       ...stats,
       totalUsers: Math.max(stats.totalUsers, 150000),
@@ -202,7 +214,7 @@ app.get("/api/platform/stats", async (req, res) => {
       timestamp: new Date().toISOString(),
       system: {
         database: databaseReady ? "PostgreSQL Connected" : "In-Memory Fallback",
-        version: "1.0.4",
+        version: "1.0.3",
         uptime: process.uptime(),
         environment: process.env.NODE_ENV || "production",
       },
@@ -217,306 +229,190 @@ app.get("/api/platform/stats", async (req, res) => {
   }
 })
 
-app.post("/api/survey/generate", async (req, res) => {
-  try {
-    const { userId, userProfile } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({
-        error: "User ID required",
-        message: "Please provide a valid user ID"
-      });
-    }
-
-    const baseEarnings = 15.50;
-    const experienceBonus = Math.min((userProfile?.completedSurveys || 0) * 0.25, 5.00);
-    const surveyId = `survey_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    const aiSurvey = {
-      id: surveyId,
-      title: `Personalized ${userProfile?.favoriteGames?.[0] || 'Gaming'} Experience Survey`,
-      description: `AI-generated survey tailored to your gaming profile`,
-      reward: baseEarnings,
-      experienceBonus: experienceBonus,
-      totalEarnings: baseEarnings + experienceBonus,
-      timeEstimate: 5 + Math.floor((userProfile?.completedSurveys || 0) / 5),
-      difficulty: (userProfile?.completedSurveys || 0) > 15 ? 'Advanced' : 
-                  (userProfile?.completedSurveys || 0) > 5 ? 'Medium' : 'Easy',
-      category: 'AI Personalized',
-      aiGenerated: true,
-      status: 'available',
-      createdAt: new Date().toISOString(),
-      questions: [
-        {
-          id: 'q1',
-          text: `How satisfied are you with your current ${userProfile?.favoriteGames?.[0] || 'gaming'} experience?`,
-          type: 'rating',
-          scale: '1-10',
-          aiContext: 'Player satisfaction analysis for game optimization'
-        },
-        {
-          id: 'q2',
-          text: 'Which gaming aspect impacts your performance most?',
-          type: 'multiple_choice',
-          options: ['Graphics performance', 'Network latency', 'Audio quality', 'Peripheral responsiveness'],
-          aiContext: 'Hardware optimization insights for manufacturers'
-        },
-        {
-          id: 'q3',
-          text: 'How do you manage gaming sessions and wellness breaks?',
-          type: 'multiple_choice', 
-          options: ['Set timers', 'Play until tired', 'Use wellness apps', 'Follow schedules'],
-          aiContext: 'Wellness habit analysis for responsible gaming'
-        },
-        {
-          id: 'q4',
-          text: 'Describe your ideal gaming environment and setup.',
-          type: 'text',
-          aiContext: 'Environmental optimization insights for peripheral manufacturers'
-        }
-      ],
-      tags: ['AI Generated', 'Personalized', userProfile?.favoriteGames?.[0] || 'Gaming']
-    };
-
-    if (databaseReady && prisma) {
-      try {
-        await prisma.survey.create({
-          data: {
-            user_id: userId,
-            title: aiSurvey.title,
-            questions: aiSurvey.questions,
-            game_context: userProfile || {},
-            estimated_earnings: aiSurvey.totalEarnings,
-            status: 'active',
-            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-          }
-        });
-        console.log(`✅ Survey saved to database: ${surveyId}`);
-      } catch (dbError) {
-        console.error('Database save failed:', dbError);
-      }
-    }
-
-    res.json({
-      success: true,
-      message: "🤖 AI survey generated successfully!",
-      survey: aiSurvey,
-      metadata: {
-        aiGenerated: true,
-        personalized: true,
-        estimatedValue: aiSurvey.totalEarnings,
-        databaseSaved: databaseReady
-      }
-    });
-
-  } catch (error) {
-    console.error("Survey generation error:", error);
-    res.status(500).json({
-      error: "Survey generation failed",
-      message: "Unable to generate survey. Please try again."
-    });
-  }
-});
-
-app.post("/api/survey/complete", async (req, res) => {
-  try {
-    const { surveyId, userId, responses, completionTime } = req.body;
-
-    if (!surveyId || !userId || !responses) {
-      return res.status(400).json({
-        error: "Missing required fields",
-        message: "Survey ID, user ID, and responses are required"
-      });
-    }
-
-    const baseEarnings = 15.50;
-    const experienceBonus = 2.50;
-    const totalEarnings = baseEarnings + experienceBonus;
-
-    if (databaseReady && prisma) {
-      try {
-        await prisma.user.update({
-          where: { id: userId },
-          data: {
-            total_earnings: { increment: totalEarnings },
-            completed_surveys: { increment: 1 }
-          }
-        });
-
-        await prisma.earning.create({
-          data: {
-            user_id: userId,
-            amount: totalEarnings,
-            source: 'survey',
-            description: `Survey completion: ${surveyId}`
-          }
-        });
-        console.log(`✅ User earnings updated: +$${totalEarnings}`);
-      } catch (dbError) {
-        console.error('Database update failed:', dbError);
-      }
-    }
-
-    res.json({
-      success: true,
-      message: `🎉 Survey completed! You earned $${totalEarnings.toFixed(2)}`,
-      earnings: {
-        base: baseEarnings,
-        bonus: experienceBonus,
-        total: totalEarnings
+// Demo data endpoint for landing page
+app.get("/api/demo/features", (req, res) => {
+  res.json({
+    success: true,
+    features: [
+      {
+        id: "ai_surveys",
+        title: "Earn with Claude AI Surveys",
+        description:
+          "Answer personalized surveys crafted by Claude AI, tailored to your gaming habits, and earn up to $15.50+ per survey with experience-based bonuses.",
+        icon: "currency-dollar",
+        category: "earning",
+        benefits: ["Up to $15.50 per survey", "Experience bonuses", "Personalized content"],
+        status: "active",
       },
-      surveyData: {
-        id: surveyId,
-        completedAt: new Date().toISOString(),
-        completionTime: completionTime,
-        responseCount: Object.keys(responses).length
-      }
-    });
-
-  } catch (error) {
-    console.error("Survey completion error:", error);
-    res.status(500).json({
-      error: "Survey completion failed",
-      message: "Unable to process survey completion."
-    });
-  }
-});
-
-app.get("/api/user/stats/:userId", async (req, res) => {
-  try {
-    const { userId } = req.params;
-
-    let userStats = {
-      totalEarnings: 487.50,
-      completedSurveys: 23,
-      averageEarnings: 21.20,
-      currentLevel: 12,
-      experiencePoints: 2850,
-      nextLevelXP: 3000,
-      wellnessScore: 85,
-      memberSince: "2024-11-15",
-      lastActive: new Date().toISOString()
-    };
-
-    if (databaseReady && prisma) {
-      try {
-        const user = await prisma.user.findUnique({
-          where: { id: userId },
-          include: {
-            earnings: { orderBy: { created_at: 'desc' }, take: 10 },
-            surveys: { 
-              where: { status: 'completed' },
-              orderBy: { completed_at: 'desc' },
-              take: 5
-            }
-          }
-        });
-
-        if (user) {
-          userStats = {
-            totalEarnings: user.total_earnings,
-            completedSurveys: user.completed_surveys,
-            averageEarnings: user.completed_surveys > 0 ? user.total_earnings / user.completed_surveys : 0,
-            currentLevel: Math.floor(user.completed_surveys / 5) + 1,
-            experiencePoints: user.completed_surveys * 100,
-            nextLevelXP: (Math.floor(user.completed_surveys / 5) + 1) * 500,
-            wellnessScore: 85,
-            memberSince: user.created_at,
-            lastActive: user.updated_at,
-            recentEarnings: user.earnings,
-            recentSurveys: user.surveys
-          };
-        }
-      } catch (dbError) {
-        console.error('Database stats fetch failed:', dbError);
-      }
-    }
-
-    res.json({
-      success: true,
-      stats: userStats,
-      metadata: {
-        source: databaseReady ? 'database' : 'demo',
-        lastUpdated: new Date().toISOString()
-      }
-    });
-
-  } catch (error) {
-    console.error("User stats error:", error);
-    res.status(500).json({
-      error: "Failed to fetch user stats",
-      message: "Unable to load user statistics."
-    });
-  }
-});
-
-app.get("/api/platform/analytics", async (req, res) => {
-  try {
-    const analytics = {
-      platformStats: {
-        totalUsers: Math.max(users.size, 150247),
-        totalCompanies: Math.max(companies.size, 532),
-        totalSurveys: 1250000,
-        totalEarnings: 2500000,
-        averageEarningsPerUser: 16.67,
-        averageSurveyTime: 7.2,
-        platformUptime: 99.97
+      {
+        id: "secure_auth",
+        title: "Fortified Authentication",
+        description:
+          "Securely register and log in with SHA-256 hashed passwords and token-based sessions, safeguarded by our robust PostgreSQL database.",
+        icon: "shield-check",
+        category: "security",
+        benefits: ["SHA-256 encryption", "Token-based sessions", "PostgreSQL security"],
+        status: "active",
       },
-      userEngagement: {
-        dailyActiveUsers: 45678,
-        weeklyActiveUsers: 125432,
-        monthlyActiveUsers: 150247,
-        averageSessionTime: 23.5,
-        surveyCompletionRate: 94.3,
-        userRetentionRate: 87.2
+      {
+        id: "party_communication",
+        title: "Dynamic Party Communication",
+        description:
+          "Form real-time gaming parties with secure, low-latency voice, video, and text communication, seamlessly connecting PC, console, and mobile players.",
+        icon: "chat-bubble-left-right",
+        category: "social",
+        benefits: ["Cross-platform support", "Low-latency communication", "Secure WebRTC"],
+        status: "active",
       },
-      surveyMetrics: {
-        surveysGeneratedToday: 2847,
-        surveysCompletedToday: 2681,
-        averageEarningsPerSurvey: 18.24,
-        aiGeneratedSurveys: 76.8,
-        userSatisfactionScore: 4.7
+      {
+        id: "ai_personalization",
+        title: "AI-Powered Personalization",
+        description:
+          "Claude AI tailors surveys and matchmaking to your playstyle, delivering personalized gaming experiences and strategic insights.",
+        icon: "cpu-chip",
+        category: "ai",
+        benefits: ["Personalized surveys", "Smart matchmaking", "Strategic insights"],
+        status: "active",
       },
-      revenueMetrics: {
-        totalPayoutsToday: 48920.50,
-        averageUserEarnings: 247.30,
-        topEarnerThisMonth: 1250.75,
-        companySpendingTotal: 125000.00
-      }
-    };
+      {
+        id: "earnings_dashboard",
+        title: "Transparent Earnings Dashboard",
+        description:
+          "Track your earnings, survey completions, and experience bonuses in real-time, securely stored in our scalable PostgreSQL database.",
+        icon: "chart-bar",
+        category: "analytics",
+        benefits: ["Real-time tracking", "Transparent reporting", "Secure storage"],
+        status: "active",
+      },
+      {
+        id: "community_hubs",
+        title: "Vibrant Community Hubs",
+        description:
+          "Create or join customizable hubs for tournaments, strategy sharing, and social engagement, fostering a player-driven gaming ecosystem.",
+        icon: "users",
+        category: "community",
+        benefits: ["Tournament hosting", "Strategy sharing", "Social engagement"],
+        status: "active",
+      },
+      {
+        id: "wellness_tracking",
+        title: "Wellness-Integrated Sessions",
+        description:
+          "Track sessions with FPS, latency, and wellness metrics like break counts, promoting balanced gaming and responsible play.",
+        icon: "heart",
+        category: "wellness",
+        benefits: ["Health monitoring", "Break reminders", "Performance tracking"],
+        status: "active",
+      },
+      {
+        id: "b2b_marketplace",
+        title: "B2B Survey Marketplace",
+        description:
+          "Companies create targeted survey requests with custom budgets and audience criteria, accessing real-time player insights.",
+        icon: "building-office",
+        category: "b2b",
+        benefits: ["Custom targeting", "Budget control", "Real-time insights"],
+        status: "active",
+      },
+      {
+        id: "enterprise_dashboard",
+        title: "Enterprise Dashboards",
+        description:
+          "B2B users access analytics, survey management, and insights reports, enabling data-driven decisions for developers and manufacturers.",
+        icon: "presentation-chart-bar",
+        category: "enterprise",
+        benefits: ["Advanced analytics", "Survey management", "Business intelligence"],
+        status: "active",
+      },
+    ],
+  })
+})
 
-    res.json({
-      success: true,
-      message: "GameSyncSphere Platform Analytics",
-      analytics,
-      timestamp: new Date().toISOString(),
-      dataSource: databaseReady ? 'Live Database' : 'Demo Data + Live Stats'
-    });
+// Use cases endpoint for landing page
+app.get("/api/demo/use-cases", (req, res) => {
+  res.json({
+    success: true,
+    useCases: [
+      {
+        id: "cod_player_earning",
+        title: "Player Earning in Call of Duty",
+        description:
+          "A competitive player completes a Claude AI survey on match performance, earning $16.50 with a $1.00 experience bonus, uniquely monetizing insights unlike traditional tools.",
+        category: "player_earning",
+        earnings: 16.5,
+        timeSpent: "5 minutes",
+        game: "Call of Duty",
+        playerType: "competitive",
+      },
+      {
+        id: "hardware_insights",
+        title: "Hardware Insights Request",
+        description:
+          "A hardware manufacturer creates a request with a $2000 budget for 500 responses on equipment satisfaction, enabling precise data acquisition in a novel marketplace.",
+        category: "b2b_insights",
+        budget: 2000,
+        responses: 500,
+        industry: "hardware_manufacturing",
+        insights: "equipment_satisfaction",
+      },
+      {
+        id: "apex_squad",
+        title: "Apex Legends Squad Coordination",
+        description:
+          "A team forms a party with secure WebRTC communication, strategizing across PC and console in real-time, bridging analytics with community engagement.",
+        category: "party_communication",
+        platforms: ["PC", "Console"],
+        game: "Apex Legends",
+        features: ["voice_chat", "strategy_sharing"],
+      },
+      {
+        id: "b2b_dashboard",
+        title: "B2B Dashboard Review",
+        description:
+          "A game developer views real-time responses and insights on their dashboard, with total spent and average cost per response, supporting data-driven innovation.",
+        category: "enterprise_analytics",
+        userType: "game_developer",
+        metrics: ["total_spent", "cost_per_response", "response_quality"],
+      },
+      {
+        id: "valorant_tournament",
+        title: "Valorant Tournament Hub",
+        description:
+          "A community hosts a tournament in a customizable hub, with Claude AI suggesting match formats based on player analytics, fostering engagement.",
+        category: "community_engagement",
+        game: "Valorant",
+        features: ["tournament_hosting", "ai_suggestions", "community_building"],
+      },
+      {
+        id: "earnings_transparency",
+        title: "Earnings Transparency for Players",
+        description:
+          "A player reviews their $75.00 total earnings and 15 completed surveys, achieving Expert-level bonuses, promoting sustained participation.",
+        category: "player_progression",
+        totalEarnings: 75.0,
+        surveysCompleted: 15,
+        level: "Expert",
+      },
+    ],
+  })
+})
 
-  } catch (error) {
-    console.error("Analytics error:", error);
-    res.status(500).json({
-      error: "Analytics fetch failed",
-      message: "Unable to load platform analytics."
-    });
-  }
-});
-
+// Root route - REMOVED THE REDIRECT TO OLD VERCEL URL
 app.get("/", (req, res) => {
+  const userAgent = req.get("User-Agent") || ""
+  const acceptsHtml = req.get("Accept")?.includes("text/html")
+
+  // Return JSON API response instead of redirecting
   res.status(200).json({
     message: "🎮 GameSyncSphere API - Railway Deployment Ready!",
     status: "healthy",
-    version: "1.0.4",
+    version: "1.0.3",
     timestamp: new Date().toISOString(),
     database: databaseReady ? "PostgreSQL Connected" : "In-Memory Fallback",
-    features: "AI Survey Generation, User Analytics, Community Platform",
+    landingPage: "Deploy the new holographic landing page to see the updated interface",
     endpoints: [
       "GET /health - Health check",
       "GET /api/platform/stats - Platform statistics",
-      "POST /api/survey/generate - AI survey generation",
-      "POST /api/survey/complete - Survey completion",
-      "GET /api/user/stats/:userId - User statistics",
-      "GET /api/platform/analytics - Platform analytics",
       "POST /api/newsletter/subscribe - Newsletter signup",
       "POST /api/contact - Contact form",
       "POST /api/auth/register - User registration",
@@ -527,12 +423,13 @@ app.get("/", (req, res) => {
   })
 })
 
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "healthy",
     message: "GameSyncSphere Backend - Railway Deployment",
     timestamp: new Date().toISOString(),
-    version: "1.0.4",
+    version: "1.0.3",
     uptime: process.uptime(),
     database: databaseReady ? "Connected" : "In-Memory",
     environment: {
@@ -542,15 +439,10 @@ app.get("/health", (req, res) => {
       hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
       hasJwtSecret: !!process.env.JWT_SECRET,
     },
-    newFeatures: [
-      "AI Survey Generation",
-      "Enhanced User Stats",
-      "Platform Analytics",
-      "Survey Completion Tracking"
-    ]
   })
 })
 
+// User Registration
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { email, username, password, fullName } = req.body
@@ -667,6 +559,7 @@ app.post("/api/auth/register", async (req, res) => {
   }
 })
 
+// User Login
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body
@@ -751,6 +644,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 })
 
+// Company Registration
 app.post("/api/companies/register", async (req, res) => {
   try {
     const { companyName, email, password, companyType, website, description } = req.body
@@ -848,6 +742,7 @@ app.post("/api/companies/register", async (req, res) => {
   }
 })
 
+// Company Login
 app.post("/api/companies/login", async (req, res) => {
   try {
     const { email, password } = req.body
@@ -909,4 +804,98 @@ app.post("/api/companies/login", async (req, res) => {
         companyType: company.company_type,
         verified: company.verified,
         totalSpent: company.total_spent,
-        current
+        currentBudget: company.current_budget,
+      },
+      token,
+    })
+  } catch (error) {
+    console.error("Company login error:", error)
+    res.status(500).json({
+      error: "Login failed",
+      message: "Unable to login",
+    })
+  }
+})
+
+// Test endpoint
+app.get("/api/test", (req, res) => {
+  res.json({
+    message: "GameSyncSphere API - Railway Deployment Ready!",
+    status: "healthy",
+    version: "1.0.3",
+    timestamp: new Date().toISOString(),
+    database: databaseReady ? "✅ PostgreSQL Connected" : "⚠️ In-Memory Fallback",
+    environment: {
+      nodeEnv: process.env.NODE_ENV || "production",
+      port: process.env.PORT || 3001,
+      hasDatabase: !!process.env.DATABASE_URL,
+      hasAnthropicKey: !!process.env.ANTHROPIC_API_KEY,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+    },
+    endpoints: [
+      "GET /health",
+      "GET /api/platform/stats",
+      "POST /api/newsletter/subscribe",
+      "POST /api/contact",
+      "POST /api/auth/register",
+      "POST /api/auth/login",
+      "POST /api/companies/register",
+      "POST /api/companies/login",
+    ],
+  })
+})
+
+// Error handling
+app.use((error, req, res, next) => {
+  console.error("Unhandled error:", error)
+  res.status(500).json({
+    error: "Internal server error",
+    message: "Something went wrong. Please try again.",
+    timestamp: new Date().toISOString(),
+  })
+})
+
+// 404 handler
+app.use("*", (req, res) => {
+  res.status(404).json({
+    error: "Endpoint not found",
+    message: `The endpoint ${req.method} ${req.originalUrl} does not exist`,
+    availableEndpoints: [
+      "GET /health",
+      "GET /api/platform/stats",
+      "POST /api/newsletter/subscribe",
+      "POST /api/contact",
+      "POST /api/auth/register",
+      "POST /api/auth/login",
+      "POST /api/companies/register",
+      "POST /api/companies/login",
+    ],
+  })
+})
+
+// Initialize database and start server
+const PORT = process.env.PORT || 3001
+
+async function startServer() {
+  try {
+    console.log("🚀 Starting GameSyncSphere Backend...")
+
+    // Initialize database
+    databaseReady = await initializeDatabase()
+
+    // Start server
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 GameSyncSphere Backend running on port ${PORT}`)
+      console.log(`🗄️ Database: ${databaseReady ? "PostgreSQL Connected" : "In-Memory Fallback"}`)
+      console.log(`🔐 Authentication: ${process.env.JWT_SECRET ? "Configured" : "Using default"}`)
+      console.log(`🤖 Claude AI: ${process.env.ANTHROPIC_API_KEY ? "ENABLED" : "DISABLED"}`)
+      console.log(`🌍 Environment: ${process.env.NODE_ENV || "production"}`)
+      console.log(`✅ Server ready for connections!`)
+    })
+  } catch (error) {
+    console.error("❌ Failed to start server:", error)
+    process.exit(1)
+  }
+}
+
+startServer()
