@@ -119,6 +119,17 @@ export default function LandingPage() {
     router.push("/auth/register")
   }
 
+  // Smooth scroll function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }
+
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
       return (num / 1000000).toFixed(1) + "M"
@@ -148,7 +159,7 @@ export default function LandingPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 border-b border-white/10 backdrop-blur-sm">
+      <header className="relative z-10 border-b border-white/10 backdrop-blur-sm sticky top-0">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -156,12 +167,24 @@ export default function LandingPage() {
               <span className="text-2xl font-bold holographic-text">GameSyncSphere</span>
             </div>
             <nav className="hidden md:flex items-center space-x-6">
-              <Link href="#features" className="text-white/80 hover:text-white transition-colors">
+              <button
+                onClick={() => scrollToSection("hero")}
+                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+              >
+                Home
+              </button>
+              <button
+                onClick={() => scrollToSection("features")}
+                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+              >
                 Features
-              </Link>
-              <Link href="#stats" className="text-white/80 hover:text-white transition-colors">
+              </button>
+              <button
+                onClick={() => scrollToSection("stats")}
+                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+              >
                 Stats
-              </Link>
+              </button>
               <Link href="/dashboard" className="text-white/80 hover:text-white transition-colors">
                 Dashboard
               </Link>
@@ -172,12 +195,19 @@ export default function LandingPage() {
                 Get Started
               </Button>
             </nav>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <Button onClick={handleGetStarted} className="neon-button">
+                Get Started
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative z-10 py-20 px-4">
+      <section id="hero" className="relative z-10 py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-6 bg-blue-500/20 text-blue-300 border-blue-500/30">
@@ -214,41 +244,99 @@ export default function LandingPage() {
               </Button>
             </div>
 
-            {/* Live Stats */}
-            {!isLoading && stats && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto" id="stats">
-                <div className="gaming-card p-6 text-center holographic-glow">
-                  <div className="text-3xl font-bold text-blue-400 counter-animation">
-                    {formatNumber(stats.totalUsers)}+
-                  </div>
-                  <div className="text-white/60 text-sm">Active Players</div>
+            {/* Quick Navigation */}
+            <div className="flex justify-center space-x-8 text-sm text-white/60">
+              <button
+                onClick={() => scrollToSection("stats")}
+                className="hover:text-white transition-colors flex items-center"
+              >
+                <TrendingUp className="mr-1 h-4 w-4" />
+                View Stats
+              </button>
+              <button
+                onClick={() => scrollToSection("features")}
+                className="hover:text-white transition-colors flex items-center"
+              >
+                <Zap className="mr-1 h-4 w-4" />
+                See Features
+              </button>
+              <button
+                onClick={() => scrollToSection("newsletter")}
+                className="hover:text-white transition-colors flex items-center"
+              >
+                <Mail className="mr-1 h-4 w-4" />
+                Get Updates
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Live Stats Section */}
+      <section id="stats" className="relative z-10 py-20 px-4 bg-black/20">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 holographic-text">Platform Statistics</h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto">
+              Real-time data from our growing community of gamers and partner companies.
+            </p>
+          </div>
+
+          {!isLoading && stats && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              <div className="gaming-card p-8 text-center holographic-glow">
+                <div className="text-4xl md:text-5xl font-bold text-blue-400 counter-animation mb-2">
+                  {formatNumber(stats.totalUsers)}+
                 </div>
-                <div className="gaming-card p-6 text-center holographic-glow">
-                  <div className="text-3xl font-bold text-green-400 counter-animation">
-                    ${formatNumber(stats.totalEarnings)}+
-                  </div>
-                  <div className="text-white/60 text-sm">Player Earnings</div>
-                </div>
-                <div className="gaming-card p-6 text-center holographic-glow">
-                  <div className="text-3xl font-bold text-purple-400 counter-animation">
-                    {formatNumber(stats.totalCompanies)}+
-                  </div>
-                  <div className="text-white/60 text-sm">Partner Companies</div>
-                </div>
-                <div className="gaming-card p-6 text-center holographic-glow">
-                  <div className="text-3xl font-bold text-orange-400 counter-animation">
-                    {formatNumber(stats.totalSurveys)}+
-                  </div>
-                  <div className="text-white/60 text-sm">Surveys Completed</div>
-                </div>
+                <div className="text-white/80 text-lg font-medium">Active Players</div>
+                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.users}% this month</div>
               </div>
-            )}
+              <div className="gaming-card p-8 text-center holographic-glow">
+                <div className="text-4xl md:text-5xl font-bold text-green-400 counter-animation mb-2">
+                  ${formatNumber(stats.totalEarnings)}+
+                </div>
+                <div className="text-white/80 text-lg font-medium">Player Earnings</div>
+                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.earnings}% this month</div>
+              </div>
+              <div className="gaming-card p-8 text-center holographic-glow">
+                <div className="text-4xl md:text-5xl font-bold text-purple-400 counter-animation mb-2">
+                  {formatNumber(stats.totalCompanies)}+
+                </div>
+                <div className="text-white/80 text-lg font-medium">Partner Companies</div>
+                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.companies}% this month</div>
+              </div>
+              <div className="gaming-card p-8 text-center holographic-glow">
+                <div className="text-4xl md:text-5xl font-bold text-orange-400 counter-animation mb-2">
+                  {formatNumber(stats.totalSurveys)}+
+                </div>
+                <div className="text-white/80 text-lg font-medium">Surveys Completed</div>
+                <div className="text-white/60 text-sm mt-2">+{stats.monthlyGrowth.surveys}% this month</div>
+              </div>
+            </div>
+          )}
+
+          {/* Additional Stats */}
+          <div className="mt-12 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-2">99.9%</div>
+                <div className="text-white/60">Platform Uptime</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-2">${stats?.averageEarningsPerUser || "16.67"}</div>
+                <div className="text-white/60">Avg. Earnings per User</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-white mb-2">3.2 min</div>
+                <div className="text-white/60">Avg. Survey Time</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="relative z-10 py-20 px-4" id="features">
+      <section id="features" className="relative z-10 py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 holographic-text">Revolutionary Features</h2>
@@ -313,18 +401,20 @@ export default function LandingPage() {
             ].map((feature, index) => (
               <Card
                 key={index}
-                className="gaming-card border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
+                className="gaming-card border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer group"
                 onClick={feature.action}
               >
                 <CardHeader>
-                  <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4`}>
+                  <div
+                    className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                  >
                     <feature.icon className={`h-6 w-6 ${feature.color}`} />
                   </div>
                   <CardTitle className="text-white">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-white/70">{feature.description}</CardDescription>
-                  <Button variant="ghost" className="mt-4 text-white/60 hover:text-white p-0">
+                  <CardDescription className="text-white/70 mb-4">{feature.description}</CardDescription>
+                  <Button variant="ghost" className="text-white/60 hover:text-white p-0 group-hover:text-white">
                     Learn More <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardContent>
@@ -335,7 +425,7 @@ export default function LandingPage() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="relative z-10 py-20 px-4">
+      <section id="newsletter" className="relative z-10 py-20 px-4 bg-black/20">
         <div className="container mx-auto">
           <Card className="gaming-card border-white/20 max-w-2xl mx-auto holographic-glow">
             <CardHeader className="text-center">
@@ -413,6 +503,12 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center space-x-6 text-white/60">
+              <button
+                onClick={() => scrollToSection("hero")}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
+                Home
+              </button>
               <Link href="/dashboard" className="hover:text-white transition-colors">
                 Dashboard
               </Link>
