@@ -22,6 +22,7 @@ import {
   Play,
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 interface PlatformStats {
   totalUsers: number
@@ -44,6 +45,7 @@ export default function LandingPage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
   const [stats, setStats] = useState<PlatformStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   // Fetch platform stats
   useEffect(() => {
@@ -109,6 +111,14 @@ export default function LandingPage() {
     }
   }
 
+  const handleGetStarted = () => {
+    router.push("/auth/register")
+  }
+
+  const handleStartEarning = () => {
+    router.push("/auth/register")
+  }
+
   const formatNumber = (num: number) => {
     if (num >= 1000000) {
       return (num / 1000000).toFixed(1) + "M"
@@ -155,7 +165,12 @@ export default function LandingPage() {
               <Link href="/dashboard" className="text-white/80 hover:text-white transition-colors">
                 Dashboard
               </Link>
-              <Button className="neon-button">Get Started</Button>
+              <Link href="/auth/login" className="text-white/80 hover:text-white transition-colors">
+                Login
+              </Link>
+              <Button onClick={handleGetStarted} className="neon-button">
+                Get Started
+              </Button>
             </nav>
           </div>
         </div>
@@ -182,7 +197,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button size="lg" className="neon-button text-lg px-8 py-4">
+              <Button size="lg" onClick={handleStartEarning} className="neon-button text-lg px-8 py-4">
                 <Play className="mr-2 h-5 w-5" />
                 Start Earning Now
               </Button>
@@ -190,6 +205,7 @@ export default function LandingPage() {
                 size="lg"
                 variant="outline"
                 className="border-white/30 text-white hover:bg-white/10 bg-transparent"
+                asChild
               >
                 <Link href="/dashboard" className="flex items-center">
                   View Dashboard
@@ -251,6 +267,7 @@ export default function LandingPage() {
                   "Personalized surveys powered by Claude AI that adapt to your gaming style and preferences.",
                 color: "text-blue-400",
                 bgColor: "bg-blue-500/20",
+                action: () => router.push("/auth/register"),
               },
               {
                 icon: DollarSign,
@@ -259,6 +276,7 @@ export default function LandingPage() {
                   "Earn up to $15.50+ per survey with experience-based bonuses. Your insights have real value.",
                 color: "text-green-400",
                 bgColor: "bg-green-500/20",
+                action: () => router.push("/auth/register"),
               },
               {
                 icon: Shield,
@@ -266,6 +284,7 @@ export default function LandingPage() {
                 description: "SHA-256 encryption, token-based sessions, and complete transparency on all earnings.",
                 color: "text-purple-400",
                 bgColor: "bg-purple-500/20",
+                action: () => router.push("/auth/login"),
               },
               {
                 icon: Users,
@@ -273,6 +292,7 @@ export default function LandingPage() {
                 description: "Join vibrant gaming communities, participate in tournaments, and share strategies.",
                 color: "text-orange-400",
                 bgColor: "bg-orange-500/20",
+                action: () => router.push("/community"),
               },
               {
                 icon: TrendingUp,
@@ -280,6 +300,7 @@ export default function LandingPage() {
                 description: "Earn more as you complete surveys. Expert players can earn significant bonuses.",
                 color: "text-pink-400",
                 bgColor: "bg-pink-500/20",
+                action: () => router.push("/auth/register"),
               },
               {
                 icon: Zap,
@@ -287,11 +308,13 @@ export default function LandingPage() {
                 description: "Track your earnings, survey completions, and gaming insights in real-time.",
                 color: "text-cyan-400",
                 bgColor: "bg-cyan-500/20",
+                action: () => router.push("/dashboard"),
               },
             ].map((feature, index) => (
               <Card
                 key={index}
-                className="gaming-card border-white/10 hover:border-white/30 transition-all duration-300"
+                className="gaming-card border-white/10 hover:border-white/30 transition-all duration-300 cursor-pointer"
+                onClick={feature.action}
               >
                 <CardHeader>
                   <div className={`w-12 h-12 rounded-lg ${feature.bgColor} flex items-center justify-center mb-4`}>
@@ -301,6 +324,9 @@ export default function LandingPage() {
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-white/70">{feature.description}</CardDescription>
+                  <Button variant="ghost" className="mt-4 text-white/60 hover:text-white p-0">
+                    Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -395,6 +421,12 @@ export default function LandingPage() {
               </Link>
               <Link href="/health" className="hover:text-white transition-colors">
                 Status
+              </Link>
+              <Link href="/auth/login" className="hover:text-white transition-colors">
+                Login
+              </Link>
+              <Link href="/auth/register" className="hover:text-white transition-colors">
+                Register
               </Link>
             </div>
           </div>
