@@ -1,9 +1,6 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  experimental: {
-    optimizePackageImports: ["lucide-react"],
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -11,29 +8,10 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["placeholder.svg"],
     unoptimized: true,
   },
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: [
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
-          },
-        ],
-      },
-    ]
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
   },
 }
 
